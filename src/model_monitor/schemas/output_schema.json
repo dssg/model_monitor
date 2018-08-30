@@ -1,0 +1,521 @@
+{
+    "distribution_metadata": [
+        {
+            "name": "distribution_id",
+            "dtype": "int",
+            "description": "distribution unique identifier",
+            "nullable": "false",
+            "constraints": "PK, unique"
+        },
+        {
+            "name": "default_type",
+            "dtype": "text",
+            "description": "default Python (numpy) datatype",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "default_value",
+            "dtype": "text",
+            "description": "default distribution value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "use_default_value_on_unsafe_cast",
+            "dtype": "bool",
+            "description": "if true, replace failed casts with default value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "is_online",
+            "dtype": "bool",
+            "description": "indicator for online distribution",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "warn_on_online_support_change",
+            "dtype": "bool",
+            "description": "if true and support changes between online updates, raise warning",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "is_discrete",
+            "dtype": "bool",
+            "description": "indicator for discrete distribution",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "custom_discrete_support",
+            "dtype": "text",
+            "description": "comma-delimited support",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "support_maximum",
+            "dtype": "float",
+            "description": "support maximum value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "support_minimum",
+            "dtype": "float",
+            "description": "support minimum value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "remove_support_violators",
+            "dtype": "bool",
+            "description": "if true, exclude values from unspecified support",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "is_nullable",
+            "dtype": "bool",
+            "description": "column nullability",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "track_moments",
+            "dtype": "bool",
+            "description": "if true, dynamically calculate moment estimates for distribution",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "n_moments",
+            "dtype": "int",
+            "description": "number of moments to dynamically track (starting at n=1)",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "n_central_moments",
+            "dtype": "int",
+            "description": "number of central moments to dynamically track (starting at n=2)",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "n_standardized_moments",
+            "dtype": "int",
+            "description": "number of moments to dynamically track (starting at n=3)",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "track_quantiles",
+            "dtype": "bool",
+            "description": "if true, dynamically track quantile estimates for distribution",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "n_quantiles",
+            "dtype": "int",
+            "description": "number of evenly-spaced quantiles to specify ",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "n_lower_tail_quantiles",
+            "dtype": "int",
+            "description": "number of lower tail quantiles to include, up to 10^-n",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "n_upper_tail_quantiles",
+            "dtype": "int",
+            "description": "number of upper tail quantiles to include, up to 1 - 10^-n",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "custom_quantiles",
+            "dtype": "text",
+            "description": "comma-delimited list of custom quantiles",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "track_histogram",
+            "dtype": "bool",
+            "description": "if true, dynamically track histogram counts",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "histogram_min",
+            "dtype": "float",
+            "description": "smallest bin value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "histogram_max",
+            "dtype": "float",
+            "description": "largest bin value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "left_inclusive",
+            "dtype": "bool",
+            "description": "if true, bins are inclusive of their left values",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "count_outside_range",
+            "dtype": "bool",
+            "description": "if true, all values outside range are counted, else classified as null",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "n_histogram_bins",
+            "dtype": "int",
+            "description": "number of evenly spaced histogram bins to use",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "custom_histogram_bins",
+            "dtype": "text",
+            "description": "comma-delimited list of custom histogram bins",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "track_cluster_estimate",
+            "dtype": "bool",
+            "description": "if true, track distribution via clustered kernel density estimate",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "num_clusters",
+            "dtype": "int",
+            "description": "number of clusters to characterize; if null, inferred from distribution",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "bandwidth",
+            "dtype": "float",
+            "description": "cluster bandwidth; if null, inferred from distribution",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "kernel_type",
+            "dtype": "text",
+            "description": "kernel type, passed into scipy definition",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "track_parametric_estimate",
+            "dtype": "bool",
+            "description": "track parametric estimate of distribution, using standard MLE optimization",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "parametric_family",
+            "dtype": "text",
+            "description": "parametric family name",
+            "nullable": "true",
+            "constraints": ""
+        }
+    ],
+    "random_variables": [
+        {
+            "name": "rv_id",
+            "dtype": "int",
+            "description": "random variable ID, unique indentifier",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "rv_name",
+            "dtype": "text",
+            "description": "random variable name",
+            "nullable": "false",
+            "constraints": "unique"
+        },
+        {
+            "name": "rv_type",
+            "dtype": "text",
+            "description": "random variable type",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "distribution_metadata_id",
+            "dtype": "int",
+            "description": "distribution_metadata_id",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "is_reserved",
+            "dtype": "bool",
+            "description": "if true, must be true for each model",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "source_table",
+            "dtype": "text",
+            "description": "feature source table",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "latent_variable_name",
+            "dtype": "int",
+            "description": "observed feature (independent of calculation type)",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "agg_func",
+            "dtype": "text",
+            "description": "aggregation function used to generate feature",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "time_agg",
+            "dtype": "text",
+            "description": "time interval (in postgresql interval format)",
+            "nullable": "false",
+            "constraints": ""
+        }],
+    "moments": [
+        {
+            "name": "feature_id",
+            "dtype": "int",
+            "description": "feature unique identifier",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "as_of_date",
+            "dtype": "timestamp",
+            "description": "latest model monitor update",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "moment_index",
+            "dtype": "int",
+            "description": "index representing ith moment",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "moment_value",
+            "dtype": "float",
+            "description": "moment value",
+            "nullable": "true",
+            "constraints": ""
+        }
+    ],
+    "quantiles": [
+        {
+            "name": "feature_id",
+            "dtype": "int",
+            "description": "feature unique identifier",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "as_of_date",
+            "dtype": "timestamp",
+            "description": "latest model monitor update",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "quantile",
+            "dtype": "float",
+            "description": "quantile, defined from [0, 1] inclusive",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "quantile_value",
+            "dtype": "float",
+            "description": "quantile value",
+            "nullable": "true",
+            "constraints": ""
+        }
+    ],
+    "histograms": [
+        {
+            "name": "feature_id",
+            "dtype": "int",
+            "description": "feature unique identifier",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "as_of_date",
+            "dtype": "timestamp",
+            "description": "latest model monitor update",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "bin_min",
+            "dtype": "float",
+            "description": "bin minimum",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "bin_max",
+            "dtype": "float",
+            "description": "bin maximum",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "value_count",
+            "dtype": "int",
+            "description": "count of values in given bin",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "value_frequency",
+            "dtype": "float",
+            "description": "frequency of values in given bin",
+            "nullable": "true",
+            "constraints": ""
+        }
+    ],
+    "cluster_kdes": [
+        {
+            "name": "feature_id",
+            "dtype": "int",
+            "description": "feature unique identifier",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "as_of_date",
+            "dtype": "timestamp",
+            "description": "latest model monitor update",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "cluster_center",
+            "dtype": "float",
+            "description": "cluster center",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "cluster_bandwidth",
+            "dtype": "float",
+            "description": "cluster bandwidth ",
+            "nullable": "false",
+            "constraints": ""
+        }
+    ],
+    "metric_defs": [
+        {
+            "name": "metric_id",
+            "dtype": "int",
+            "description": "metric definition ID",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "metric_calc_name",
+            "dtype": "text",
+            "description": "metric calc name",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "compare_interval",
+            "dtype": "interval",
+            "description": "comparison interval",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "subset_name",
+            "dtype": "text",
+            "description": "subset name, as specified in config",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "threshold",
+            "dtype": "float",
+            "description": "subset filter argument",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "weights_args",
+            "dtype": "jsonb",
+            "description": "weight arguments",
+            "nullable": "true",
+            "constraints": ""
+        }
+    ],
+    "metrics": [
+        {
+            "name": "as_of_date",
+            "dtype": "timestamp",
+            "description": "latest model monitor update",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "int",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "rv_id",
+            "dtype": "int",
+            "description": "random variable ID",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "metric_id",
+            "dtype": "int",
+            "description": "metric definition ID",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "metric_value",
+            "dtype": "float",
+            "description": "metric value",
+            "nullable": "false",
+            "constraints": ""
+        }
+    ]
+}
