@@ -211,7 +211,7 @@ def tabulate_metric_defs(mm_config):
                 metric_section_tables.append(_unpack_metric_args(block_metric_args))
 
             # concatenate metric section tables and append
-            metric_tables[ix] = pd.concat(metric_section_tables)
+            metric_tables[ix] = pd.concat(metric_section_tables)  # type: pd.DataFrame
 
         else:
             # only global settings specified- check to make sure config is properly specified
@@ -224,4 +224,6 @@ def tabulate_metric_defs(mm_config):
             # if so, then append
             metric_tables[ix] = _unpack_metric_args(global_metric_args)
 
-    # return mapping of random variables to 
+    # return mapping of random variables to
+    rv_names = [k[:-8] for k in metric_sections]
+    return dict(zip(rv_names, metric_tables))
