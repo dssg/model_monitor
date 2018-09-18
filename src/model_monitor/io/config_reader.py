@@ -224,6 +224,6 @@ def tabulate_metric_defs(mm_config):
             # if so, then append
             metric_tables[ix] = _unpack_metric_args(global_metric_args)
 
-    # return mapping of random variables to
+    # return mapping of random variables to metric tables
     rv_names = [k[:-8] for k in metric_sections]
     return dict(zip(rv_names, metric_tables))
