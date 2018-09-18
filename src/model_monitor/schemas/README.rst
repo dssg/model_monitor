@@ -1,6 +1,45 @@
 ``model_monitor`` schema definition, with table and column descriptions.
 
+Introduction
+----------------------
+
 .. image:: schema_diagram/mm_schema.png
+
+
+The following schema holds output data from ``model_monitor``. This allows ``model_monitor`` to reuse data, such as
+estimates of quantized distribution functions, repeatedly without having to recalculate them. Additionally, users can
+directly query this data to view historical performance on metrics over time.
+
+The schema has three tables for ``model_monitor`` configuration...
+
+- ``distribution_metadata``: defines how distributions are quantized
+- ``metric_defs``: defines how differences in distributions are calculated
+- ``random_variables``: defines which random variables are tracked over time
+
+
+... five tables for distribution quantization ...
+
+- ``moments``: moment estimates
+- ``quantiles``: quantile estimates
+- ``histograms``: histogram estimates
+- ``cluster_kdes``: clustering estimates
+- ``parametric_estimates``: parametric estimates from known distributions
+
+... and one table for storing metric results (``metrics``).
+
+
+Usage
+--------------------
+
+For ``model_monitor`` users: you do not need to directly push to this database:
+
+- Metadata will be initialized by running the initialization ``airflow`` job (see documentation [LINK] for details)
+- IO operations will handle automatic data uploads as jobs start and complete. 
+
+
+
+Full schema definition
+-------------------------
 
 ``distribution_metadata``:
 
