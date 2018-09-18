@@ -470,9 +470,9 @@
             "constraints": ""
         },
         {
-            "name": "subset_args",
-            "dtype": "jsonb",
-            "description": "subset filter arguments",
+            "name": "subset_threshold",
+            "dtype": "float",
+            "description": "subset filter argument",
             "nullable": "true",
             "constraints": ""
         }

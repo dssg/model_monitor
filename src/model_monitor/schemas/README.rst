@@ -253,7 +253,7 @@ Each row defines a single metric calculation, including the name, comparison int
     +----------------+--------+-----------------------------------+--------+-----------+
     |subset_name     |text    |subset name, as specified in config|False   |           |
     +----------------+--------+-----------------------------------+--------+-----------+
-    |subset_args     |jsonb   |subset filter arguments            |True    |           |
+    |subset_threshold|float   |subset filter arguments            |True    |           |
     +----------------+--------+-----------------------------------+--------+-----------+
 
 ``metrics``:

@@ -205,7 +205,7 @@ class MetricDefs(Base):
     metric_calc_name = Column(Text)
     compare_interval = Column(Interval)
     subset_name = Column(Text)
-    subset_args = Column(JSONB, nullable=True)
+    subset_threshold = Column(Float, nullable=True)
 
     idx_metric_defs = Index('metric_id', unique=True)
 
