@@ -1,16 +1,16 @@
 {
     "distribution_metadata": [
         {
-            "name": "distribution_id",
+            "name": "distribution_metadata_id",
             "dtype": "int",
-            "description": "distribution unique identifier",
+            "description": "distribution metadata unique identifier",
             "nullable": "false",
-            "constraints": "PK, unique"
+            "constraints": "PK"
         },
         {
             "name": "default_type",
             "dtype": "text",
-            "description": "default Python (numpy) datatype",
+            "description": "default Python (numpy) data type",
             "nullable": "true",
             "constraints": ""
         },
@@ -50,13 +50,6 @@
             "constraints": ""
         },
         {
-            "name": "custom_discrete_support",
-            "dtype": "text",
-            "description": "comma-delimited support",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
             "name": "support_maximum",
             "dtype": "float",
             "description": "support maximum value",
@@ -71,7 +64,7 @@
             "constraints": ""
         },
         {
-            "name": "remove_support_violators",
+            "name": "remove_samples_out_of_support",
             "dtype": "bool",
             "description": "if true, exclude values from unspecified support",
             "nullable": "true",
@@ -85,36 +78,8 @@
             "constraints": ""
         },
         {
-            "name": "track_moments",
-            "dtype": "bool",
-            "description": "if true, dynamically calculate moment estimates for distribution",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "n_moments",
-            "dtype": "int",
-            "description": "number of moments to dynamically track (starting at n=1)",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "n_central_moments",
-            "dtype": "int",
-            "description": "number of central moments to dynamically track (starting at n=2)",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "n_standardized_moments",
-            "dtype": "int",
-            "description": "number of moments to dynamically track (starting at n=3)",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "track_quantiles",
-            "dtype": "bool",
+            "name": "tracking_mode",
+            "dtype": "text",
             "description": "if true, dynamically track quantile estimates for distribution",
             "nullable": "false",
             "constraints": ""
@@ -145,13 +110,6 @@
             "dtype": "text",
             "description": "comma-delimited list of custom quantiles",
             "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "track_histogram",
-            "dtype": "bool",
-            "description": "if true, dynamically track histogram counts",
-            "nullable": "false",
             "constraints": ""
         },
         {
@@ -197,37 +155,23 @@
             "constraints": ""
         },
         {
-            "name": "track_cluster_estimate",
-            "dtype": "bool",
-            "description": "if true, track distribution via clustered kernel density estimate",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "num_clusters",
+            "name": "n_clusters",
             "dtype": "int",
             "description": "number of clusters to characterize; if null, inferred from distribution",
             "nullable": "true",
             "constraints": ""
         },
         {
-            "name": "bandwidth",
-            "dtype": "float",
-            "description": "cluster bandwidth; if null, inferred from distribution",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "kernel_type",
+            "name": "clustering_algorithm",
             "dtype": "text",
-            "description": "kernel type, passed into scipy definition",
+            "description": "clustering algorithm name",
             "nullable": "true",
             "constraints": ""
         },
         {
-            "name": "track_parametric_estimate",
-            "dtype": "bool",
-            "description": "track parametric estimate of distribution, using standard MLE optimization",
+            "name": "clustering_algorithm_kwargs",
+            "dtype": "jsonb",
+            "description": "clustering algorithm kwargs",
             "nullable": "true",
             "constraints": ""
         },
@@ -269,17 +213,10 @@
             "constraints": ""
         },
         {
-            "name": "is_reserved",
-            "dtype": "bool",
-            "description": "if true, must be true for each model",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
             "name": "source_table",
             "dtype": "text",
             "description": "feature source table",
-            "nullable": "false",
+            "nullable": "true",
             "constraints": ""
         },
         {
@@ -302,14 +239,22 @@
             "description": "time interval (in postgresql interval format)",
             "nullable": "false",
             "constraints": ""
-        }],
+        }
+    ],
     "moments": [
         {
-            "name": "feature_id",
+            "name": "rv_id",
             "dtype": "int",
-            "description": "feature unique identifier",
+            "description": "random variable ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, FK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "int",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK, ~FK"
         },
         {
             "name": "as_of_date",
@@ -335,11 +280,18 @@
     ],
     "quantiles": [
         {
-            "name": "feature_id",
+            "name": "rv_id",
             "dtype": "int",
-            "description": "feature unique identifier",
+            "description": "random variable ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, FK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "int",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK, ~FK"
         },
         {
             "name": "as_of_date",
@@ -365,11 +317,18 @@
     ],
     "histograms": [
         {
-            "name": "feature_id",
+            "name": "rv_id",
             "dtype": "int",
-            "description": "feature unique identifier",
+            "description": "random variable ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, FK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "int",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK, ~FK"
         },
         {
             "name": "as_of_date",
@@ -409,11 +368,18 @@
     ],
     "cluster_kdes": [
         {
-            "name": "feature_id",
+            "name": "rv_id",
             "dtype": "int",
-            "description": "feature unique identifier",
+            "description": "random variable ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, FK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "int",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK, ~FK"
         },
         {
             "name": "as_of_date",
@@ -430,9 +396,46 @@
             "constraints": "PK"
         },
         {
-            "name": "cluster_bandwidth",
+            "name": "cluster_parameter",
             "dtype": "float",
-            "description": "cluster bandwidth ",
+            "description": "cluster parameter",
+            "nullable": "false",
+            "constraints": ""
+        }
+    ],
+    "parametric_estimates": [
+        {
+            "name": "rv_id",
+            "dtype": "int",
+            "description": "random variable ID",
+            "nullable": "false",
+            "constraints": "PK, FK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "int",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK, ~FK"
+        },
+        {
+            "name": "as_of_date",
+            "dtype": "timestamp",
+            "description": "latest model monitor update",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "parameter_index",
+            "dtype": "int",
+            "description": "argument index of parameter",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "parameter_value",
+            "dtype": "float",
+            "description": "parameter value",
             "nullable": "false",
             "constraints": ""
         }
@@ -467,16 +470,9 @@
             "constraints": ""
         },
         {
-            "name": "threshold",
-            "dtype": "float",
-            "description": "subset filter argument",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "weights_args",
+            "name": "subset_args",
             "dtype": "jsonb",
-            "description": "weight arguments",
+            "description": "subset filter arguments",
             "nullable": "true",
             "constraints": ""
         }
@@ -494,21 +490,21 @@
             "dtype": "int",
             "description": "model ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, ~FK"
         },
         {
             "name": "rv_id",
             "dtype": "int",
             "description": "random variable ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, FK"
         },
         {
             "name": "metric_id",
             "dtype": "int",
             "description": "metric definition ID",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": "PK, FK"
         },
         {
             "name": "metric_value",
