@@ -2,6 +2,7 @@ import os
 import json
 import warnings
 import inspect
+from collections import namedtuple
 
 import yaml
 import boto3
@@ -129,3 +130,33 @@ def get_s3_client_by_conn_id(conn_id):
         aws_access_key_id=conn_extra['aws_access_key_id'],
         aws_secret_access_key=conn_extra['aws_secret_access_key']
     )
+
+
+DistributionMetadata = namedtuple('DistributionMetadata', [
+    'distribution_metadata_id',
+    'default_type',
+    'default_value',
+    'use_default_value_on_unsafe_cast',
+    'is_online',
+    'warn_on_online_support_change',
+    'is_discrete',
+    'support_maximum',
+    'support_minimum',
+    'remove_samples_out_of_support',
+    'is_nullable',
+    'tracking_mode',
+    'n_quantiles',
+    'n_lower_tail_quantiles',
+    'n_upper_tail_quantiles',
+    'custom_quantiles',
+    'histogram_min',
+    'histogram_max',
+    'left_inclusive',
+    'count_outside_range',
+    'n_histogram_bins',
+    'custom_histogram_bins',
+    'n_clusters',
+    'clustering_algorithm',
+    'clustering_algorithm_kwargs',
+    'parametric_family',
+])

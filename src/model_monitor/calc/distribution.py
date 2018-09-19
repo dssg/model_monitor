@@ -135,6 +135,18 @@ class BaseDistribution(object):
         """
         return interpolate.PchipInterpolator(self.support, self.cdf_vals)
 
+    def reset(self):
+        """
+        Clear all data from distribution, keeping metadata in place
+
+        :return: None
+        """
+        self.sample_size = 0
+        self.null_size = 0
+        self.support = None
+        self.pdf_vals = None
+        self.cdf_vals = None
+
 
 class DiscreteDistribution(BaseDistribution):
     """
