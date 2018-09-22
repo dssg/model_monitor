@@ -15,8 +15,6 @@ from model_monitor.report.shared import (
     OfflineReinitializationWarning
 )
 
-SUPPORTED_CLUSTER_MODELS = ['KMeans', 'MiniBatchKMeans', 'AgglomerativeClustering', 'Birch', 'SpectralClustering']
-
 
 class BadMetadataError(ValueError):
     """
@@ -298,7 +296,7 @@ class BaseDistribution(ABC):
         """
         Constructor
 
-        :param distribution_metadata: NamedTuple
+        :param distribution_metadata: DistributionMetadata
         """
         assert isinstance(distribution_metadata, DistributionMetadata)
         self.metadata = distribution_metadata
@@ -474,7 +472,7 @@ class DiscreteDistribution(BaseDistribution):
         """
         Constructor
 
-        :param distribution_metadata: NamedTuple
+        :param distribution_metadata: DistributionMetadata
         """
         BaseDistribution.__init__(self, distribution_metadata)
 
@@ -555,7 +553,7 @@ class ContinuousDistribution(BaseDistribution):
         """
         Constructor
 
-        :param distribution_metadata: NamedTuple
+        :param distribution_metadata: DistributionMetadata
         """
         BaseDistribution.__init__(self, distribution_metadata)
 
@@ -638,7 +636,7 @@ class ContinuousDistribution(BaseDistribution):
             self._cluster_parametric_cdf = None
 
         else:
-            raise ValueError("Must track quantiles, histogram, clusters, or parametric estimate of distribution")
+            raise ValueError("Must track quantile, histogram, clusters, or parametric estimate of distribution")
 
     @staticmethod
     def mle_fit_argmap(samples, parametric_family):
@@ -685,7 +683,7 @@ class ContinuousDistribution(BaseDistribution):
 
     def update(self, new_values, test_state=None):
         """
-        Constructor
+        Add new values
 
         :param new_values: np.array or pd.Series
         :param test_state: np.random.RandomState, used for testing reproducibility only
@@ -809,7 +807,7 @@ class ContinuousDistribution(BaseDistribution):
         # ------------------------------------------------------------------------------------------------------------
 
         elif self.metadata.tracking_mode == 'histogram':
-
+            # update CDF online or offline, depending on existing support
             if self.metadata.is_online:
                 self._hist_values += np.concatenate([np.array([0.]),
                                                      np.histogram(vals, bins=self._histogram_bins)[0]])
@@ -828,6 +826,7 @@ class ContinuousDistribution(BaseDistribution):
         # ------------------------------------------------------------------------------------------------------------
 
         elif self.metadata.tracking_mode == 'parametric':
+            # only allow one initialization
             if not self._offline_initialized:
                 # fit distribution
                 self._parametric_args = self.mle_fit_argmap(vals, self.metadata.parametric_family)
@@ -861,6 +860,7 @@ class ContinuousDistribution(BaseDistribution):
             cluster_centers = self._cluster_model.cluster_centers_.flatten()
             estimated_clusters = cluster_centers[estimated_labels]
 
+            # cluster parametric fit
             if self.metadata.clustering_parametric_family:
 
                 # fit parametric estimate for each cluster
@@ -904,10 +904,13 @@ class ContinuousDistribution(BaseDistribution):
 
         :return: function
         """
+        # check for parametric estimates first
         if self.metadata.tracking_mode == 'parametric':
             return self._parametric_cdf
         elif self.metadata.tracking_mode == 'cluster' and self.metadata.clustering_parametric_family:
             return self._cluster_parametric_cdf
+
+        # else fall back on interpolant solution
         else:
             return self._default_cdf_empirical_mapping()
 
@@ -916,7 +919,7 @@ def distribution_factory(distribution_metadata):
     """
     Create distribution class from metadata
 
-    :param distribution_metadata: NamedTuple
+    :param distribution_metadata: DistributionMetadata
     :return: BaseDistribution
     """
     if distribution_metadata.is_discrete:
