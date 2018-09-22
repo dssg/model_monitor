@@ -6,8 +6,14 @@ import model_monitor.calc.distribution as mm_dist
 
 
 class TestDistributionMetadata(unittest.TestCase):
+    """
+    Test class for distribution metadata parsing
+    """
 
     def test_ctor_default_type_check(self):
+        """
+        Test default type checking
+        """
         # valid default types
         mm_dist.DistributionMetadata(is_discrete=True, default_type='int')
 
@@ -16,6 +22,9 @@ class TestDistributionMetadata(unittest.TestCase):
             mm_dist.DistributionMetadata(is_discrete=True, default_type='invalid')
 
     def test_ctor_custom_quantile_parsing(self):
+        """
+        Test quantile parsing
+        """
         valid_quantiles = [.01, .02, .03, .04]
         invalid_range_quantiles = [-1, .02, .3]
         nonnumeric_quantiles = [.01, .02, 'wrong']
@@ -40,12 +49,15 @@ class TestDistributionMetadata(unittest.TestCase):
                                          custom_quantiles=nonnumeric_quantiles)
 
     def test_ctor_cluster_algorithm_ctor(self):
+        """
+        Test cluster algorithm constructor validity
+        """
         valid_class = 'KMeans'
         invalid_class = 'not_valid'
         valid_args = {'init': 'k-means++'}
         invalid_args = {'not_valid': 'still_not_valid'}
 
-        # valid arguments
+        # valid cluster names and arguments should be parsed succesfully
         mm_dist.DistributionMetadata(is_discrete=False,
                                      tracking_mode='cluster',
                                      clustering_algorithm=valid_class,
@@ -56,7 +68,7 @@ class TestDistributionMetadata(unittest.TestCase):
                                      clustering_algorithm_kwargs=valid_args,
                                      n_clusters=10)
 
-        # invalid arguments
+        # invalid cluster names or arguments should raise an error
         with self.assertRaises(mm_dist.BadMetadataError):
             mm_dist.DistributionMetadata(is_discrete=False,
                                          tracking_mode='cluster',
@@ -71,14 +83,21 @@ class TestDistributionMetadata(unittest.TestCase):
                                          n_clusters=10)
 
     def test_ctor_parametric_family(self):
-        # valid arguments
+        """
+        Test parametric family constructor validity
+        """
+
+        # valid parametric families construct as expected
         mm_dist.DistributionMetadata(is_discrete=False, tracking_mode='parametric', parametric_family='norm')
 
-        # invalid arguments
+        # invalid parametric family should raise an error
         with self.assertRaises(mm_dist.BadMetadataError):
             mm_dist.DistributionMetadata(is_discrete=False, tracking_mode='parametric', parametric_family='wrong')
 
     def test_preprocessing_null_handling(self):
+        """
+        Test preprocessing null handling
+        """
         # null handling
         null_dm = mm_dist.DistributionMetadata(is_discrete=True, is_nullable=True)
         null_dd = mm_dist.DiscreteDistribution(null_dm)
@@ -92,12 +111,18 @@ class TestDistributionMetadata(unittest.TestCase):
             nonnull_dd.update([1., 2., 3., np.NaN])
 
     def test_preprocessing_type_casting(self):
+        """
+        Test preprocessing type casting
+        """
         # normal casting
         cast_dm = mm_dist.DistributionMetadata(is_discrete=True, default_type='float')
         cast_dd = mm_dist.DiscreteDistribution(cast_dm)
         cast_dd.update([1, 2, 3])
 
-    def test_preprocessing_support_casting(self):
+    def test_preprocessing_support_handling(self):
+        """
+        Test preprocessing support handling
+        """
         # remove values outside support
         remove_dm = mm_dist.DistributionMetadata(is_discrete=True,
                                                  support_maximum=2,
@@ -119,9 +144,15 @@ class TestDistributionMetadata(unittest.TestCase):
 
 
 class TestDiscreteDistribution(unittest.TestCase):
+    """
+    Test class for discrete distributions
+    """
 
     @classmethod
     def setUpClass(cls):
+        """
+        Create offline and online discrete distributions
+        """
         cls.offline_dist = mm_dist.DiscreteDistribution(mm_dist.DistributionMetadata(
             is_discrete=True, is_online=False))
 
@@ -129,10 +160,16 @@ class TestDiscreteDistribution(unittest.TestCase):
             is_discrete=True, is_online=True))
 
     def tearDown(self):
+        """
+        Reset existing distributions after each test
+        """
         self.online_dist.reset()
         self.offline_dist.reset()
 
     def test_update_offline(self):
+        """
+        Test one shot updates of discrete distributions
+        """
         # offline first update
         self.offline_dist.update([1, 1, 2, 2, 3, 3, 4, 4])
         np.testing.assert_almost_equal(self.offline_dist.cdf_vals,
@@ -143,6 +180,9 @@ class TestDiscreteDistribution(unittest.TestCase):
             self.offline_dist.update([1, 2])
 
     def test_update_online(self):
+        """
+        Test online discrete distribution estimation
+        """
         # online first update
         self.online_dist.update([1, 2, ])
         np.testing.assert_almost_equal(self.online_dist.cdf_vals,
@@ -155,10 +195,17 @@ class TestDiscreteDistribution(unittest.TestCase):
 
 
 class TestContinuousDistributionQuantile(unittest.TestCase):
+    """
+    Test class for quantile-tracked continuous distributions
+    """
+
     RNG_SEED = 12345
 
     @classmethod
     def setUpClass(cls):
+        """
+        Create online and offline quantile-tracked distributions
+        """
         state = np.random.RandomState(seed=cls.RNG_SEED)
         cls.sample1 = stats.norm.rvs(size=1000, random_state=state)
         cls.sample2 = stats.norm.rvs(size=1000, random_state=state)
@@ -180,14 +227,23 @@ class TestContinuousDistributionQuantile(unittest.TestCase):
         ))
 
     def tearDown(self):
+        """
+        Reset existing distributions after each test
+        """
         self.cd_offline.reset()
         self.cd_online.reset()
 
     def test_quantile_args(self):
+        """
+        Test quantile arg parsing
+        """
         np.testing.assert_almost_equal(self.cd_offline._quantiles,
                                        np.array([0., 0.2, 0.4, 0.6, 0.8, 0.9, 0.99, 1.]))
 
     def test_quantile_offline_calc(self):
+        """
+        Test quantile offline calculation (single shot calc)
+        """
         self.cd_offline.update(self.sample1)
         # test CDF values
         np.testing.assert_almost_equal(
@@ -204,6 +260,9 @@ class TestContinuousDistributionQuantile(unittest.TestCase):
                                .51280366)
 
     def test_quantile_online_calc(self):
+        """
+        Test quantile online calculation using P2 algorithm
+        """
         self.cd_online.update(self.sample1)
         self.cd_online.update(self.sample2)
 
@@ -222,10 +281,16 @@ class TestContinuousDistributionQuantile(unittest.TestCase):
 
 
 class TestContinuousDistributionHistogram(unittest.TestCase):
+    """
+    Test class for histogram-tracked continuous distributions
+    """
     RNG_SEED = 23456
 
     @classmethod
     def setUpClass(cls):
+        """
+        Create online and offline histogram-tracked distributions
+        """
         state = np.random.RandomState(seed=cls.RNG_SEED)
         cls.sample1 = stats.norm.rvs(size=1000, random_state=state)
         cls.sample2 = stats.norm.rvs(size=1000, random_state=state)
@@ -249,16 +314,25 @@ class TestContinuousDistributionHistogram(unittest.TestCase):
         ))
 
     def tearDown(self):
+        """
+        Reset existing distributions after each test
+        """
         self.cd_offline.reset()
         self.cd_online.reset()
 
     def test_histogram_args(self):
+        """
+        Test histogram argument parsing
+        """
         np.testing.assert_almost_equal(
             self.cd_offline._histogram_bins,
             np.array([-2., - 1.5, - 1., - 0.5, 0., 0.5, 1., 1.5, 2.])
         )
 
     def test_histogram_offline(self):
+        """
+        Test offline calc
+        """
         self.cd_offline.update(self.sample1)
 
         np.testing.assert_almost_equal(
@@ -268,6 +342,9 @@ class TestContinuousDistributionHistogram(unittest.TestCase):
         )
 
     def test_histogram_online(self):
+        """
+        Test online calc
+        """
         self.cd_online.update(self.sample1)
         self.cd_online.update(self.sample2)
 
@@ -279,10 +356,16 @@ class TestContinuousDistributionHistogram(unittest.TestCase):
 
 
 class TestContinuousDistributionParametricEstimate(unittest.TestCase):
+    """
+    Test class for parametric distribution estimation
+    """
     RNG_SEED = 34567
 
     @classmethod
     def setUpClass(cls):
+        """
+        Create random samples and distribution classes
+        """
         state = np.random.RandomState(seed=cls.RNG_SEED)
         cls.norm_sample = stats.norm.rvs(size=1000, random_state=state)
         cls.beta_sample = stats.beta.rvs(size=1000, a=2, b=3, random_state=state)
@@ -300,10 +383,16 @@ class TestContinuousDistributionParametricEstimate(unittest.TestCase):
         ))
 
     def tearDown(self):
+        """
+        Reset existing distributions after each test
+        """
         self.cd_norm.reset()
         self.cd_beta.reset()
 
     def test_parametric_estimate_loc_scale(self):
+        """
+        Test distribution estimates that only depend on location-scale parameters
+        """
         self.cd_norm.update(self.norm_sample)
 
         params = self.cd_norm._parametric_args
@@ -311,6 +400,9 @@ class TestContinuousDistributionParametricEstimate(unittest.TestCase):
         self.assertAlmostEqual(params['scale'], 0.9466261033408847)
 
     def test_parametric_estimate_shape(self):
+        """
+        Test distribution estimates that depend on shape parameters
+        """
         self.cd_beta.update(self.beta_sample)
 
         params = self.cd_beta._parametric_args
@@ -318,16 +410,26 @@ class TestContinuousDistributionParametricEstimate(unittest.TestCase):
         self.assertAlmostEqual(params['b'], 3.090479591572537)
 
     def test_parametric_cdf(self):
+        """
+        Test CDF construction and evaluation
+        """
         self.cd_norm.update(self.norm_sample)
         self.assertAlmostEqual(self.cd_norm.cdf(0.0), 0.5035173621607916)
 
 
 class TestContinuousDistributionCluster(unittest.TestCase):
+    """
+    Test class for cluster-tracked distributions
+    """
+
     RNG_SEED = 45678
     ALGO_RNG_SEED = 56789
 
     @classmethod
     def setUpClass(cls):
+        """
+        Create mixture distributions with different CDF generation methods
+        """
         state = np.random.RandomState(seed=cls.RNG_SEED)
         cls.norm_mix = np.concatenate([
             stats.norm.rvs(size=1000, random_state=state),
@@ -351,9 +453,15 @@ class TestContinuousDistributionCluster(unittest.TestCase):
         ))
 
     def tearDown(self):
+        """
+        Reset existing distributions after each test
+        """
         self.cd_mix_nonparam.reset()
 
     def test_nonparametric_cluster_fit(self):
+        """
+        Test nonparametric mixture distribution
+        """
         self.cd_mix_nonparam.update(self.norm_mix,
                                     test_state=np.random.RandomState(seed=self.ALGO_RNG_SEED))
 
@@ -363,6 +471,9 @@ class TestContinuousDistributionCluster(unittest.TestCase):
         )
 
     def test_parametric_cluster_fit(self):
+        """
+        Test parametric mixture distribution
+        """
         self.cd_mix_param.update(self.norm_mix,
                                  test_state=np.random.RandomState(seed=self.ALGO_RNG_SEED))
 
