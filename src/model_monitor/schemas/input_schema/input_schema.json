@@ -2,117 +2,96 @@
     "model_groups": [
         {
             "name": "model_group_id",
-            "dtype": "int4",
+            "dtype": "Integer",
             "description": "model group ID, unique identifier",
             "nullable": "false",
-            "constraints": "PK, unique"
+            "constraints": "PK"
         },
         {
             "name": "model_type",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "model class definition, must be importable in python",
             "nullable": "false",
             "constraints": ""
         },
         {
             "name": "model_parameters",
-            "dtype": "jsonb",
+            "dtype": "JSONB",
             "description": "model parameters passed to model_type, by keyword",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "feature_list",
-            "dtype": "_text",
+            "dtype": "ARRAY(Text)",
             "description": "text list of feature names, comma delimited",
             "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "model_config",
-            "dtype": "jsonb",
-            "description": "process parameters passed generically to python",
-            "nullable": "true",
             "constraints": ""
         }
     ],
     "models": [
         {
             "name": "model_id",
-            "dtype": "int4",
+            "dtype": "Integer",
             "description": "model ID, unique identifier",
             "nullable": "false",
-            "constraints": "PK, unique"
+            "constraints": "PK"
         },
         {
             "name": "model_group_id",
-            "dtype": "int4",
+            "dtype": "Integer",
             "description": "model group ID",
             "nullable": "false",
             "constraints": "FK"
         },
         {
-            "name": "train_end_time",
-            "dtype": "timestamp",
+            "name": "as_of_date",
+            "dtype": "DateTime",
             "description": "effective end of training time",
             "nullable": "false",
             "constraints": ""
         },
         {
-            "name": "config",
-            "dtype": "jsonb",
-            "description": "process parameters passed generically to python",
-            "nullable": "true",
+            "name": "train_matrix_id",
+            "dtype": "Text",
+            "description": "training matrix unique ID",
+            "nullable": "false",
             "constraints": ""
         }
     ],
     "predictions": [
         {
             "name": "model_id",
-            "dtype": "int4",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
-            "name": "entity_id",
-            "dtype": "int8",
-            "description": "entity ID, unique identifier",
+            "name": "test_matrix_id",
+            "dtype": "Text",
+            "description": "testing matrix unique ID",
             "nullable": "false",
             "constraints": "PK"
         },
         {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "date of latest prediction",
+            "name": "entity_id",
+            "dtype": "Integer",
+            "description": "entity unique ID",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "score",
-            "dtype": "numeric",
-            "description": "predicted outcome",
+            "dtype": "Float",
+            "description": "predicted score",
             "nullable": "false",
             "constraints": ""
         },
         {
-            "name": "label_value",
-            "dtype": "int4",
+            "name": "label",
+            "dtype": "Integer",
             "description": "true outcome",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "rank_abs",
-            "dtype": "int8",
-            "description": "entity-level rank of entity score",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "rank_pct",
-            "dtype": "float8",
-            "description": "entity-level rank percentile of score",
             "nullable": "false",
             "constraints": ""
         }
@@ -120,36 +99,22 @@
     "feature_importances": [
         {
             "name": "model_id",
-            "dtype": "int4",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "feature",
-            "dtype": "text",
-            "description": "feature name, unique identifier",
+            "dtype": "Text",
+            "description": "feature name, unique ID",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "feature_importance",
-            "dtype": "numeric",
+            "dtype": "Float",
             "description": "estimated feature contribution",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "rank_abs",
-            "dtype": "int8",
-            "description": "feature-level rank of importance",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "rank_pct",
-            "dtype": "float8",
-            "description": "feature_level rank of importance",
             "nullable": "false",
             "constraints": ""
         }
