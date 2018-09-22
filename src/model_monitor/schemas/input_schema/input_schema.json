@@ -45,19 +45,65 @@
             "constraints": "FK"
         },
         {
-            "name": "as_of_date",
+            "name": "train_matrix_id",
+            "dtype": "Integer",
+            "description": "training matrix unique ID",
+            "nullable": "false",
+            "constraints": "FK"
+        }
+    ],
+    "training_matrices": [
+        {
+            "name": "train_matrix_id",
+            "dtype": "Integer",
+            "description": "training matrix unique ID",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "train_matrix_uuid",
+            "dtype": "Text",
+            "description": "training matrix UUID",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "train_as_of_date",
             "dtype": "DateTime",
-            "description": "effective end of training time",
+            "description": "training matrix most recent update",
+            "nullable": "false",
+            "constraints": ""
+        }
+    ],
+    "testing_matrices": [
+        {
+            "name": "test_matrix_id",
+            "dtype": "Integer",
+            "description": "testing matrix unique ID",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "test_matrix_uuid",
+            "dtype": "Text",
+            "description": "testing matrix UUID",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "test_as_of_date",
+            "dtype": "DateTime",
+            "description": "testing matrix most recent update",
             "nullable": "false",
             "constraints": ""
         },
         {
             "name": "train_matrix_id",
-            "dtype": "Text",
-            "description": "training matrix unique ID",
+            "dtype": "Integer",
+            "description": "associated training matrix unique ID",
             "nullable": "false",
-            "constraints": ""
-        }
+            "constraints": "FK"
+        },
     ],
     "predictions": [
         {

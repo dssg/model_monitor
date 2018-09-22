@@ -36,8 +36,33 @@ class Models(Base):
 
     model_id = Column(Integer, primary_key=True)
     model_group_id = Column(Integer)
-    as_of_date = Column(DateTime)
-    train_matrix_id = Column(Text)
+    train_matrix_id = Column(Integer)
+
+
+class TrainingMatrices(Base):
+    """
+    Table definition for 'training_matrices'
+
+    Each row is specified by a single matrix UUID and most recent matrix update
+    """
+
+    __tablename__ = 'training_matrices'
+
+    train_matrix_id = Column(Integer, primary_key=True)
+    train_matrix_uuid = Column(Text)
+    train_as_of_date = Column(DateTime)
+
+
+class TestingMatrices(Base):
+    """
+    Table definition for 'testing_matrices'
+
+    Each row is specified by a single matrix UUID, most recent matrix update, and optional associated training matrix
+    """
+    test_matrix_id = Column(Integer, primary_key=True)
+    test_matrix_uuid = Column(Text)
+    test_as_of_date = Column(DateTime)
+    train_matrix_id = Column(Integer, nullable=True)
 
 
 class Predictions(Base):
