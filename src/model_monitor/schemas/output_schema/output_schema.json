@@ -2,183 +2,183 @@
     "distribution_metadata": [
         {
             "name": "distribution_metadata_id",
-            "dtype": "int",
-            "description": "distribution metadata unique identifier",
+            "dtype": "Integer",
+            "description": "distribution metadata unique ID",
             "nullable": "false",
             "constraints": "PK"
         },
         {
+            "name": "is_discrete",
+            "dtype": "Boolean",
+            "description": "if True, assumes support is quantized and tracks all unique samples",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "is_nullable",
+            "dtype": "Boolean",
+            "description": "if non-nullable, null values are removed",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
             "name": "default_type",
-            "dtype": "text",
-            "description": "default Python (numpy) data type",
+            "dtype": "Text",
+            "description": "default ``numpy`` type to cast samples",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "default_value",
-            "dtype": "text",
-            "description": "default distribution value",
+            "dtype": "Float",
+            "description": "default value for imputation purposes",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "use_default_value_on_unsafe_cast",
-            "dtype": "bool",
-            "description": "if true, replace failed casts with default value",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "is_online",
-            "dtype": "bool",
-            "description": "indicator for online distribution",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "warn_on_online_support_change",
-            "dtype": "bool",
-            "description": "if true and support changes between online updates, raise warning",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "is_discrete",
-            "dtype": "bool",
-            "description": "indicator for discrete distribution",
-            "nullable": "false",
-            "constraints": ""
-        },
-        {
-            "name": "support_maximum",
-            "dtype": "float",
-            "description": "support maximum value",
+            "dtype": "Boolean",
+            "description": "if cast fails, use imputed value defined above",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "support_minimum",
-            "dtype": "float",
-            "description": "support minimum value",
+            "dtype": "Float",
+            "description": "minimum sample value",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "support_maximum",
+            "dtype": "Float",
+            "description": "maximum support value",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "remove_samples_out_of_support",
-            "dtype": "bool",
-            "description": "if true, exclude values from unspecified support",
+            "dtype": "Boolean",
+            "description": "if True, removes values that violate support bounds",
             "nullable": "true",
             "constraints": ""
         },
         {
-            "name": "is_nullable",
-            "dtype": "bool",
-            "description": "column nullability",
-            "nullable": "false",
+            "name": "is_online",
+            "dtype": "Boolean",
+            "description": "if True, distribution supports multiple sample updates",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "warn_on_online_support_change",
+            "dtype": "Boolean",
+            "description": "if online and support changes after update, raise warning",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "interpolation_mode",
+            "dtype": "Text",
+            "description": "if using CDF point estimate interpolation, specify method",
+            "nullable": "true",
             "constraints": ""
         },
         {
             "name": "tracking_mode",
-            "dtype": "text",
-            "description": "if true, dynamically track quantile estimates for distribution",
-            "nullable": "false",
+            "dtype": "Text",
+            "description": "quantization method for continuous distributions",
+            "nullable": "true",
             "constraints": ""
         },
         {
             "name": "n_quantiles",
-            "dtype": "int",
-            "description": "number of evenly-spaced quantiles to specify ",
+            "dtype": "Integer",
+            "description": "number of evenly spaced quantiles",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "n_lower_tail_quantiles",
-            "dtype": "int",
-            "description": "number of lower tail quantiles to include, up to 10^-n",
+            "dtype": "Integer",
+            "description": "number of lower tail quantiles, in powers of ten",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "n_upper_tail_quantiles",
-            "dtype": "int",
-            "description": "number of upper tail quantiles to include, up to 1 - 10^-n",
+            "dtype": "Integer",
+            "description": "number of upper tail quantiles, in powers of ten",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "custom_quantiles",
-            "dtype": "text",
-            "description": "comma-delimited list of custom quantiles",
+            "dtype": "ARRAY(Float)",
+            "description": "list of custom quantile values (all in [0, 1])",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "histogram_min",
-            "dtype": "float",
-            "description": "smallest bin value",
+            "dtype": "Float",
+            "description": "minimum histogram bin value",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "histogram_max",
-            "dtype": "float",
-            "description": "largest bin value",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "left_inclusive",
-            "dtype": "bool",
-            "description": "if true, bins are inclusive of their left values",
-            "nullable": "true",
-            "constraints": ""
-        },
-        {
-            "name": "count_outside_range",
-            "dtype": "bool",
-            "description": "if true, all values outside range are counted, else classified as null",
+            "dtype": "Float",
+            "description": "maximum histogram bin value",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "n_histogram_bins",
-            "dtype": "int",
-            "description": "number of evenly spaced histogram bins to use",
+            "dtype": "Integer",
+            "description": "number of evenly spaced histogram bins",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "custom_histogram_bins",
-            "dtype": "text",
-            "description": "comma-delimited list of custom histogram bins",
+            "dtype": "Text",
+            "description": "list of custom histogram bins",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "n_clusters",
-            "dtype": "int",
-            "description": "number of clusters to characterize; if null, inferred from distribution",
+            "dtype": "Integer",
+            "description": "number of clusters to quantize",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "clustering_algorithm",
-            "dtype": "text",
-            "description": "clustering algorithm name",
+            "dtype": "Text",
+            "description": "clustering algorithm name (as specified by ``sklearn.cluster``)",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "clustering_algorithm_kwargs",
-            "dtype": "jsonb",
-            "description": "clustering algorithm kwargs",
+            "dtype": "JSONB",
+            "description": "arguments to pass to the algorithm class constructor",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
+            "name": "clustering_parametric_family",
+            "dtype": "Text",
+            "description": "if specified, fits parametric estimate to each cluster, else does interpolation",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "parametric_family",
-            "dtype": "text",
-            "description": "parametric family name",
+            "dtype": "Text",
+            "description": "name of parametric family (as specified by ``scipy.stats``)",
             "nullable": "true",
             "constraints": ""
         }
@@ -186,130 +186,93 @@
     "random_variables": [
         {
             "name": "rv_id",
-            "dtype": "int",
-            "description": "random variable ID, unique indentifier",
+            "dtype": "Integer",
+            "description": "random variable ID",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "rv_name",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "random variable name",
             "nullable": "false",
             "constraints": "unique"
         },
         {
             "name": "rv_type",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "random variable type",
             "nullable": "false",
             "constraints": ""
         },
         {
             "name": "distribution_metadata_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "distribution_metadata_id",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "source_table",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "feature source table",
             "nullable": "true",
             "constraints": ""
         },
         {
+            "name": "is_test",
+            "dtype": "Boolean",
+            "description": "if True, use test-associated data",
+            "nullable": "true",
+            "constraints": ""
+        },
+        {
             "name": "latent_variable_name",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "observed feature (independent of calculation type)",
             "nullable": "false",
             "constraints": ""
         },
         {
             "name": "agg_func",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "aggregation function used to generate feature",
             "nullable": "false",
             "constraints": ""
         },
         {
             "name": "time_agg",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "time interval (in postgresql interval format)",
             "nullable": "false",
-            "constraints": ""
-        }
-    ],
-    "moments": [
-        {
-            "name": "rv_id",
-            "dtype": "int",
-            "description": "random variable ID",
-            "nullable": "false",
-            "constraints": "PK, FK"
-        },
-        {
-            "name": "model_id",
-            "dtype": "int",
-            "description": "model ID",
-            "nullable": "false",
-            "constraints": "PK, ~FK"
-        },
-        {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "latest model monitor update",
-            "nullable": "false",
-            "constraints": "PK"
-        },
-        {
-            "name": "moment_index",
-            "dtype": "int",
-            "description": "index representing ith moment",
-            "nullable": "false",
-            "constraints": "PK"
-        },
-        {
-            "name": "moment_value",
-            "dtype": "float",
-            "description": "moment value",
-            "nullable": "true",
             "constraints": ""
         }
     ],
     "quantiles": [
         {
             "name": "rv_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "random variable ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "model_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, ~FK"
         },
         {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "latest model monitor update",
-            "nullable": "false",
-            "constraints": "PK"
-        },
-        {
             "name": "quantile",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "quantile, defined from [0, 1] inclusive",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "quantile_value",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "quantile value",
             "nullable": "true",
             "constraints": ""
@@ -318,87 +281,124 @@
     "histograms": [
         {
             "name": "rv_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "random variable ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "model_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, ~FK"
         },
         {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "latest model monitor update",
-            "nullable": "false",
-            "constraints": "PK"
-        },
-        {
             "name": "bin_min",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "bin minimum",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "bin_max",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "bin maximum",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "value_count",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "count of values in given bin",
             "nullable": "true",
             "constraints": ""
         },
         {
             "name": "value_frequency",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "frequency of values in given bin",
             "nullable": "true",
             "constraints": ""
         }
     ],
-    "cluster_kdes": [
+    "cluster_nonparametric_weights": [
         {
             "name": "rv_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "random variable ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "model_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, ~FK"
         },
         {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "latest model monitor update",
-            "nullable": "false",
-            "constraints": "PK"
-        },
-        {
             "name": "cluster_center",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "cluster center",
             "nullable": "false",
             "constraints": "PK"
         },
         {
-            "name": "cluster_parameter",
-            "dtype": "float",
-            "description": "cluster parameter",
+            "name": "cluster_weight",
+            "dtype": "Float",
+            "description": "cluster weight",
+            "nullable": "false",
+            "constraints": ""
+        }
+    ],
+    "cluster_parameters": [
+        {
+            "name": "rv_id",
+            "dtype": "Integer",
+            "description": "random variable ID",
+            "nullable": "false",
+            "constraints": "PK, FK"
+        },
+        {
+            "name": "model_id",
+            "dtype": "Integer",
+            "description": "model ID",
+            "nullable": "false",
+            "constraints": "PK, ~FK"
+        },
+        {
+            "name": "cluster_center",
+            "dtype": "Float",
+            "description": "cluster center",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "cluster_parameter_index",
+            "dtype": "Integer",
+            "description": "cluster parameter index in ``scipy.stats`` constructor",
+            "nullable": "false",
+            "constraints": "PK"
+        },
+        {
+            "name": "cluster_parameter_name",
+            "dtype": "Text",
+            "description": "cluster parameter name",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "cluster_parameter_value",
+            "dtype": "Float",
+            "description": "cluster parameter value",
+            "nullable": "false",
+            "constraints": ""
+        },
+        {
+            "name": "cluster_weight",
+            "dtype": "Float",
+            "description": "cluster weight",
             "nullable": "false",
             "constraints": ""
         }
@@ -406,35 +406,35 @@
     "parametric_estimates": [
         {
             "name": "rv_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "random variable ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "model_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, ~FK"
         },
         {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "latest model monitor update",
+            "name": "parameter_index",
+            "dtype": "Integer",
+            "description": "parameter index in ``scipy.stats`` constructor",
             "nullable": "false",
             "constraints": "PK"
         },
         {
-            "name": "parameter_index",
-            "dtype": "int",
-            "description": "argument index of parameter",
+            "name": "parameter_name",
+            "dtype": "Text",
+            "description": "parameter name",
             "nullable": "false",
-            "constraints": "PK"
+            "constraints": ""
         },
         {
             "name": "parameter_value",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "parameter value",
             "nullable": "false",
             "constraints": ""
@@ -443,14 +443,14 @@
     "metric_defs": [
         {
             "name": "metric_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "metric definition ID",
             "nullable": "false",
             "constraints": "PK"
         },
         {
             "name": "metric_calc_name",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "metric calc name",
             "nullable": "false",
             "constraints": ""
@@ -464,14 +464,14 @@
         },
         {
             "name": "subset_name",
-            "dtype": "text",
+            "dtype": "Text",
             "description": "subset name, as specified in config",
             "nullable": "false",
             "constraints": ""
         },
         {
             "name": "subset_threshold",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "subset filter argument",
             "nullable": "true",
             "constraints": ""
@@ -479,36 +479,29 @@
     ],
     "metrics": [
         {
-            "name": "as_of_date",
-            "dtype": "timestamp",
-            "description": "latest model monitor update",
-            "nullable": "false",
-            "constraints": "PK"
-        },
-        {
             "name": "model_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "model ID",
             "nullable": "false",
             "constraints": "PK, ~FK"
         },
         {
             "name": "rv_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "random variable ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "metric_id",
-            "dtype": "int",
+            "dtype": "Integer",
             "description": "metric definition ID",
             "nullable": "false",
             "constraints": "PK, FK"
         },
         {
             "name": "metric_value",
-            "dtype": "float",
+            "dtype": "Float",
             "description": "metric value",
             "nullable": "false",
             "constraints": ""

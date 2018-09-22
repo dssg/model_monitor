@@ -6,6 +6,8 @@ from .schema import (
     Base,
     ModelGroups,
     Models,
+    TrainingMatrices,
+    TestingMatrices,
     Predictions,
     FeatureImportances
 )
@@ -14,6 +16,8 @@ __all__ = (
     'Base',
     'Models',
     'ModelGroups',
+    'TrainingMatrices',
+    'TestingMatrices',
     'Predictions',
     'FeatureImportances',
     'mark_db_as_upgraded',
