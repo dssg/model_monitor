@@ -103,7 +103,7 @@
             "description": "associated training matrix unique ID",
             "nullable": "false",
             "constraints": "FK"
-        },
+        }
     ],
     "predictions": [
         {
