@@ -3,6 +3,7 @@ import numpy as np
 import scipy.stats as stats
 
 import model_monitor.calc.distribution as mm_dist
+import model_monitor.io.config_reader
 
 
 class TestDistributionMetadata(unittest.TestCase):
@@ -15,11 +16,11 @@ class TestDistributionMetadata(unittest.TestCase):
         Test default type checking
         """
         # valid default types
-        mm_dist.DistributionMetadata(is_discrete=True, default_type='int')
+        model_monitor.io.config_reader.DistributionMetadata(is_discrete=True, default_type='int')
 
         # invalid default types
-        with self.assertRaises(mm_dist.BadMetadataError):
-            mm_dist.DistributionMetadata(is_discrete=True, default_type='invalid')
+        with self.assertRaises(model_monitor.io.config_reader.BadMetadataError):
+            model_monitor.io.config_reader.DistributionMetadata(is_discrete=True, default_type='invalid')
 
     def test_ctor_custom_quantile_parsing(self):
         """
@@ -30,23 +31,23 @@ class TestDistributionMetadata(unittest.TestCase):
         nonnumeric_quantiles = [.01, .02, 'wrong']
 
         # valid quantiles
-        mm_dist.DistributionMetadata(is_discrete=False,
-                                     tracking_mode='quantile',
-                                     interpolation_mode='linear',
-                                     custom_quantiles=valid_quantiles)
+        model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                            tracking_mode='quantile',
+                                                            interpolation_mode='linear',
+                                                            custom_quantiles=valid_quantiles)
 
         # invalid quantiles
-        with self.assertRaises(mm_dist.BadMetadataError):
-            mm_dist.DistributionMetadata(is_discrete=False,
-                                         tracking_mode='quantile',
-                                         interpolation_mode='linear',
-                                         custom_quantiles=invalid_range_quantiles)
+        with self.assertRaises(model_monitor.io.config_reader.BadMetadataError):
+            model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                                tracking_mode='quantile',
+                                                                interpolation_mode='linear',
+                                                                custom_quantiles=invalid_range_quantiles)
 
-        with self.assertRaises(mm_dist.BadMetadataError):
-            mm_dist.DistributionMetadata(is_discrete=False,
-                                         tracking_mode='quantile',
-                                         interpolation_mode='linear',
-                                         custom_quantiles=nonnumeric_quantiles)
+        with self.assertRaises(model_monitor.io.config_reader.BadMetadataError):
+            model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                                tracking_mode='quantile',
+                                                                interpolation_mode='linear',
+                                                                custom_quantiles=nonnumeric_quantiles)
 
     def test_ctor_cluster_algorithm_ctor(self):
         """
@@ -58,29 +59,29 @@ class TestDistributionMetadata(unittest.TestCase):
         invalid_args = {'not_valid': 'still_not_valid'}
 
         # valid cluster names and arguments should be parsed succesfully
-        mm_dist.DistributionMetadata(is_discrete=False,
-                                     tracking_mode='cluster',
-                                     clustering_algorithm=valid_class,
-                                     n_clusters=10)
-        mm_dist.DistributionMetadata(is_discrete=False,
-                                     tracking_mode='cluster',
-                                     clustering_algorithm=valid_class,
-                                     clustering_algorithm_kwargs=valid_args,
-                                     n_clusters=10)
+        model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                            tracking_mode='cluster',
+                                                            clustering_algorithm=valid_class,
+                                                            n_clusters=10)
+        model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                            tracking_mode='cluster',
+                                                            clustering_algorithm=valid_class,
+                                                            clustering_algorithm_kwargs=valid_args,
+                                                            n_clusters=10)
 
         # invalid cluster names or arguments should raise an error
-        with self.assertRaises(mm_dist.BadMetadataError):
-            mm_dist.DistributionMetadata(is_discrete=False,
-                                         tracking_mode='cluster',
-                                         clustering_algorithm=invalid_class,
-                                         n_clusters=10)
+        with self.assertRaises(model_monitor.io.config_reader.BadMetadataError):
+            model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                                tracking_mode='cluster',
+                                                                clustering_algorithm=invalid_class,
+                                                                n_clusters=10)
 
-        with self.assertRaises(mm_dist.BadMetadataError):
-            mm_dist.DistributionMetadata(is_discrete=False,
-                                         tracking_mode='cluster',
-                                         clustering_algorithm=valid_class,
-                                         clustering_algorithm_kwargs=invalid_args,
-                                         n_clusters=10)
+        with self.assertRaises(model_monitor.io.config_reader.BadMetadataError):
+            model_monitor.io.config_reader.DistributionMetadata(is_discrete=False,
+                                                                tracking_mode='cluster',
+                                                                clustering_algorithm=valid_class,
+                                                                clustering_algorithm_kwargs=invalid_args,
+                                                                n_clusters=10)
 
     def test_ctor_parametric_family(self):
         """
@@ -88,25 +89,25 @@ class TestDistributionMetadata(unittest.TestCase):
         """
 
         # valid parametric families construct as expected
-        mm_dist.DistributionMetadata(is_discrete=False, tracking_mode='parametric', parametric_family='norm')
+        model_monitor.io.config_reader.DistributionMetadata(is_discrete=False, tracking_mode='parametric', parametric_family='norm')
 
         # invalid parametric family should raise an error
-        with self.assertRaises(mm_dist.BadMetadataError):
-            mm_dist.DistributionMetadata(is_discrete=False, tracking_mode='parametric', parametric_family='wrong')
+        with self.assertRaises(model_monitor.io.config_reader.BadMetadataError):
+            model_monitor.io.config_reader.DistributionMetadata(is_discrete=False, tracking_mode='parametric', parametric_family='wrong')
 
     def test_preprocessing_null_handling(self):
         """
         Test preprocessing null handling
         """
         # null handling
-        null_dm = mm_dist.DistributionMetadata(is_discrete=True, is_nullable=True)
+        null_dm = model_monitor.io.config_reader.DistributionMetadata(is_discrete=True, is_nullable=True)
         null_dd = mm_dist.DiscreteDistribution(null_dm)
         null_dd.update([1., 2., 3., np.NaN])
         self.assertAlmostEqual(null_dd.null_proportion(), .25)
 
         # unhandled nulls
         with self.assertWarns(mm_dist.NullableSampleWarning):
-            nonnull_dm = mm_dist.DistributionMetadata(is_discrete=True, is_nullable=False)
+            nonnull_dm = model_monitor.io.config_reader.DistributionMetadata(is_discrete=True, is_nullable=False)
             nonnull_dd = mm_dist.DiscreteDistribution(nonnull_dm)
             nonnull_dd.update([1., 2., 3., np.NaN])
 
@@ -115,7 +116,7 @@ class TestDistributionMetadata(unittest.TestCase):
         Test preprocessing type casting
         """
         # normal casting
-        cast_dm = mm_dist.DistributionMetadata(is_discrete=True, default_type='float')
+        cast_dm = model_monitor.io.config_reader.DistributionMetadata(is_discrete=True, default_type='float')
         cast_dd = mm_dist.DiscreteDistribution(cast_dm)
         cast_dd.update([1, 2, 3])
 
@@ -124,9 +125,9 @@ class TestDistributionMetadata(unittest.TestCase):
         Test preprocessing support handling
         """
         # remove values outside support
-        remove_dm = mm_dist.DistributionMetadata(is_discrete=True,
-                                                 support_maximum=2,
-                                                 remove_samples_out_of_support=True)
+        remove_dm = model_monitor.io.config_reader.DistributionMetadata(is_discrete=True,
+                                                                        support_maximum=2,
+                                                                        remove_samples_out_of_support=True)
 
         with self.assertWarns(mm_dist.SampleOutsideSupportWarning):
             dd = mm_dist.DiscreteDistribution(remove_dm)
@@ -134,8 +135,8 @@ class TestDistributionMetadata(unittest.TestCase):
             self.assertEquals(dd.sample_size, 2)
 
         # keep values outside support
-        keep_dm = mm_dist.DistributionMetadata(is_discrete=True,
-                                               support_maximum=2)
+        keep_dm = model_monitor.io.config_reader.DistributionMetadata(is_discrete=True,
+                                                                      support_maximum=2)
 
         with self.assertWarns(mm_dist.SampleOutsideSupportWarning):
             dd = mm_dist.DiscreteDistribution(keep_dm)
@@ -153,10 +154,10 @@ class TestDiscreteDistribution(unittest.TestCase):
         """
         Create offline and online discrete distributions
         """
-        cls.offline_dist = mm_dist.DiscreteDistribution(mm_dist.DistributionMetadata(
+        cls.offline_dist = mm_dist.DiscreteDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=True, is_online=False))
 
-        cls.online_dist = mm_dist.DiscreteDistribution(mm_dist.DistributionMetadata(
+        cls.online_dist = mm_dist.DiscreteDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=True, is_online=True))
 
     def tearDown(self):
@@ -209,7 +210,7 @@ class TestContinuousDistributionQuantile(unittest.TestCase):
         state = np.random.RandomState(seed=cls.RNG_SEED)
         cls.sample1 = stats.norm.rvs(size=1000, random_state=state)
         cls.sample2 = stats.norm.rvs(size=1000, random_state=state)
-        cls.cd_offline = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_offline = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='quantile',
             n_quantiles=5,
@@ -217,7 +218,7 @@ class TestContinuousDistributionQuantile(unittest.TestCase):
             interpolation_mode='linear'
         ))
 
-        cls.cd_online = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_online = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='quantile',
             n_quantiles=5,
@@ -294,7 +295,7 @@ class TestContinuousDistributionHistogram(unittest.TestCase):
         state = np.random.RandomState(seed=cls.RNG_SEED)
         cls.sample1 = stats.norm.rvs(size=1000, random_state=state)
         cls.sample2 = stats.norm.rvs(size=1000, random_state=state)
-        cls.cd_offline = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_offline = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='histogram',
             histogram_min=-2,
@@ -303,7 +304,7 @@ class TestContinuousDistributionHistogram(unittest.TestCase):
             interpolation_mode='linear'
         ))
 
-        cls.cd_online = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_online = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='histogram',
             histogram_min=-2,
@@ -370,13 +371,13 @@ class TestContinuousDistributionParametricEstimate(unittest.TestCase):
         cls.norm_sample = stats.norm.rvs(size=1000, random_state=state)
         cls.beta_sample = stats.beta.rvs(size=1000, a=2, b=3, random_state=state)
 
-        cls.cd_norm = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_norm = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='parametric',
             parametric_family='norm'
         ))
 
-        cls.cd_beta = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_beta = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='parametric',
             parametric_family='beta'
@@ -436,7 +437,7 @@ class TestContinuousDistributionCluster(unittest.TestCase):
             stats.norm.rvs(size=1000, random_state=state) + 1.5
         ])
 
-        cls.cd_mix_nonparam = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_mix_nonparam = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='cluster',
             interpolation_mode='empirical',
@@ -444,7 +445,7 @@ class TestContinuousDistributionCluster(unittest.TestCase):
             clustering_algorithm='KMeans'
         ))
 
-        cls.cd_mix_param = mm_dist.ContinuousDistribution(mm_dist.DistributionMetadata(
+        cls.cd_mix_param = mm_dist.ContinuousDistribution(model_monitor.io.config_reader.DistributionMetadata(
             is_discrete=False,
             tracking_mode='cluster',
             n_clusters=2,
