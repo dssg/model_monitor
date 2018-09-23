@@ -1,14 +1,15 @@
 SELECT
-    m.model_id,
-    m.model_group_id,
-    m.train_matrix_id
-FROM models m
+    tem.test_matrix_id,
+    tem.test_matrix_uuid,
+    tem.test_as_of_date,
+    tem.train_matrix_id
+FROM testing_matrices tem
+INNER JOIN training_matrices trm
+ON tem.train_matrix_id = trm.test_matrix_id
+INNER JOIN models m
+ON m.train_matrix_id = trm.train_matrix_id
 INNER JOIN model_groups mg
 ON mg.model_group_id = m.model_group_id
-INNER JOIN training_matrices trm
-ON trm.train_matrix_id = m.train_matrix_id
-INNER JOIN testing_matrices tem
-ON tem.test_matrix_id = trm.train_matrix_id
 WHERE (mg.model_group_id IN(SELECT (UNNEST(%(included_model_group_ids)s))) OR
        NOT %(filter_included_model_group_ids)s)
 AND (mg.model_group_id NOT IN (SELECT (UNNEST(%(excluded_model_group_ids)s))) OR
