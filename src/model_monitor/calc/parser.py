@@ -117,7 +117,7 @@ def parse_metric_name(metric_name):
         require_join = True
 
     elif _BOOL_CALC_RE.match(metric_name):
-        calc_class = 'entity'
+        calc_class = 'bool'
         calc_type = metric_name
         calc_order = 0
         require_join = True
@@ -272,17 +272,33 @@ def apply_distribution_calc(d1, d2, calc_type, distribution_metadata, calc_order
             return integrated_lp_cdf_distance(f1, f2, 0., 1., calc_order)
 
 
-def apply_metric_calculation(today_df, compare_df, metric_defs, distribution_metadata):
+def apply_entity_bool_calc(v1, v2, calc_type):
+    """
+    Apply boolean difference to two boolean vectors
+
+    :param v1: np.array
+    :param v2: np.array
+    :param calc_type: str
+    :return: float
+    """
+    return getattr(spatial.distance, calc_type)(v1, v2)
+
+
+def apply_metric_calculation(target_df, reference_df, metric_defs, distribution_metadata):
     """
     Apply metric calculations to two dataframes of sample values
 
-    :param today_df: pd.DataFrame
-    :param compare_df: pd.DataFrame
+    :param target_df: pd.DataFrame
+    :param reference_df: pd.DataFrame
     :param metric_defs: pd.DataFrame
     :param distribution_metadata: NamedTuple
     :return: pd.DataFrame
     """
-    requirements_df = metric_defs['metric_name'].apply(parse_metric_name, axis=1)
+    requirements_df = pd.concat([
+        metric_defs,
+        metric_defs['metric_name'].apply(parse_metric_name, axis=1),
+    ], axis=1)  # type: pd.DataFrame
+
     collected_metric_dfs = []
 
     # build distributions (may not calculate CDF if only using preprocessing)
@@ -294,8 +310,8 @@ def apply_metric_calculation(today_df, compare_df, metric_defs, distribution_met
 
     if not point_metric_defs.empty:
         # extract and preprocess samples
-        v1 = d1._preprocess_values(today_df['sample_value'])
-        v2 = d2._preprocess_values(compare_df['sample_value'])
+        v1 = d1._preprocess_values(target_df['sample_value'])
+        v2 = d2._preprocess_values(reference_df['sample_value'])
 
         # apply all metrics
         point_metric_defs.loc[:, 'metric_value'] = point_metric_defs.apply(
@@ -309,9 +325,9 @@ def apply_metric_calculation(today_df, compare_df, metric_defs, distribution_met
 
     if not entity_join_metric_defs.empty:
         # extract and preprocess samples
-        joined_df = pd.merge(today_df, compare_df, how='inner', on='entity_id', suffixes=('_t', '_c'))
-        v1 = d1._preprocess_values(joined_df['_t'])
-        v2 = d2._preprocess_values(joined_df['_c'])
+        joined_df = pd.merge(target_df, reference_df, how='inner', on='entity_id', suffixes=('_t', '_r'))
+        v1 = d1._preprocess_values(joined_df['sample_value_t'])
+        v2 = d2._preprocess_values(joined_df['sample_value_r'])
 
         # apply all metrics
         entity_join_metric_defs.loc[:, 'metric_value'] = point_metric_defs.apply(
@@ -321,6 +337,23 @@ def apply_metric_calculation(today_df, compare_df, metric_defs, distribution_met
 
         collected_metric_dfs.append(entity_join_metric_defs)
 
+    # stage three: subset metrics
+    entity_bool_metric_defs = requirements_df[requirements_df['calc_class'] == 'bool']
+
+    if not entity_bool_metric_defs.empty:
+        # collect entity IDs
+        all_entity_ids = list(set.union(target_df['entity_id'], reference_df['entity_id']))
+        v1 = np.in1d(target_df['entity_id'], all_entity_ids)
+        v2 = np.in1d(reference_df['entity_id'], all_entity_ids)
+
+        # apply all metrics
+        entity_bool_metric_defs.loc[:, 'metric_value]'] = entity_bool_metric_defs.apply(
+            lambda row: apply_entity_bool_calc(v1, v2, row['calc_type']),
+            axis=1
+        )
+
+        collected_metric_dfs.append(entity_bool_metric_defs)
+
     # stage three: distribution metrics
     distribution_metric_defs = requirements_df[requirements_df['calc_class'] == 'distribution']
 
@@ -329,8 +362,8 @@ def apply_metric_calculation(today_df, compare_df, metric_defs, distribution_met
         d1.reset()
         d2.reset()
 
-        d1.update(today_df['sample_value'])
-        d2.update(compare_df['sample_value'])
+        d1.update(target_df['sample_value'])
+        d2.update(reference_df['sample_value'])
 
         # apply all metrics
         distribution_metric_defs.loc[:, 'metric_value'] = distribution_metric_defs.apply(

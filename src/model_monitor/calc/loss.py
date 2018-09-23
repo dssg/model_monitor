@@ -95,12 +95,16 @@ class PredictionPreprocessor(object):
         """
         return self._raw_df['label']
 
+    # ---------------------------------------------------------------------------------------------------------------
+    # Precision filtering
+    # ---------------------------------------------------------------------------------------------------------------
+
     def decision_boundary_at_precision(self, p):
         """
         Decision boundary at a fixed precision
 
         :param p: float, precision
-        :return: pd.Series
+        :return: float
         """
         return self._thresholds[np.argmax(self._precision >= p)]
 
@@ -122,6 +126,41 @@ class PredictionPreprocessor(object):
         :return: np.ndarray
         """
         m = skmetrics.confusion_matrix(self.raw_labels(), self.predictions_at_precision(p))
+        if normalize:
+            return m / float(self.n)
+        return m
+
+    # ---------------------------------------------------------------------------------------------------------------
+    # Extremal entity filtering
+    # ---------------------------------------------------------------------------------------------------------------
+
+    def decision_boundary_at_top_n(self, n):
+        """
+        Decision boundary at a fixed top n entities
+
+        :param n: int, top n entities
+        :return: float
+        """
+        return np.array(self.raw_scores())[-n]
+
+    def predictions_at_top_n(self, n):
+        """
+        Predictions for a fixed top n entities
+
+        :param n: int, top n entities
+        :return: np.array
+        """
+        return np.where(self.raw_scores() > self.decision_boundary_at_top_n(n), 1, 0)
+
+    def confusion_matrix_at_top_n(self, n, normalize=True):
+        """
+        Confusion matrix at fixed top n entities
+
+        :param n: int, top n entities
+        :param normalize: bool, if True then normalize matrix
+        :return: np.ndarray
+        """
+        m = skmetrics.confusion_matrix(self.raw_labels(), self.predictions_at_top_n(n))
         if normalize:
             return m / float(self.n)
         return m
