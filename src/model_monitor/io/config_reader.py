@@ -1,6 +1,8 @@
 import os
+import re
 import inspect
 import itertools
+import numpy as np
 import pandas as pd
 from importlib.machinery import SourceFileLoader
 
@@ -129,6 +131,136 @@ def _feature_extractor_factory(mmc, feature_extractors):
 
 
 # --------------------------------------------------------------------------------------------------------------------
+# Feature name parsing
+# --------------------------------------------------------------------------------------------------------------------
+
+
+TIME_AGG_PATTERN = '_([0-9]+[dwmy])_'
+TIME_AGG_REGEX = re.compile(TIME_AGG_PATTERN)
+TIME_AGG_REGEX_TERM = re.compile(TIME_AGG_PATTERN[:-1] + '$')
+
+AGG_FUNCS = ['min', 'max', 'mode', 'sum', 'avg', 'var', 'variance', 'iqr', 'count', 'rate', 'stddev']
+AGG_FUNC_PATTERN = '_({})_'.format('|'.join(AGG_FUNCS))
+AGG_FUNC_REGEX = re.compile(AGG_FUNC_PATTERN)
+AGG_FUNC_REGEX_TERM = re.compile(AGG_FUNC_PATTERN[:-1] + '$')
+
+DEFAULT_SOURCE_TABLE_REGEX = re.compile('^(.*_id)_')
+
+
+def _parse_agg_func_type(agg, default=''):
+    """
+    Map aggregation function to behavior
+
+    :param agg: str
+    :param default: default value
+    :return: str
+    """
+
+    if agg in ['avg', 'mode']:
+        return 'central'
+    elif agg in ['var', 'variance', 'stddev', 'iqr']:
+        return 'variation'
+    elif agg in ['max', 'sum', 'count']:
+        return 'extremal_upper'
+    elif agg == 'min':
+        return 'extremal_lower'
+    elif agg == 'rate':
+        return 'rate'
+    else:
+        return default
+
+
+def _parse_default_triage_feature_name(feat):
+    """
+    Unpack feature name into components using the standard triage structure
+
+    :param feat: str, feature name
+    :return: dict
+    """
+    try:
+        # attempt to match (source_table, time_agg, feature_name, agg_func)
+        feat_remainder, agg_func = [i for i in AGG_FUNC_REGEX_TERM.split(feat) if i]
+        source_table, time_agg, feature_name = TIME_AGG_REGEX.split(feat_remainder)
+        return {
+            'source_table': source_table,
+            'time_agg': time_agg,
+            'feature_name': feature_name,
+            'agg_func': agg_func
+        }
+    except:
+        try:
+            # attempt to match (source_table, feature_name, agg_func)
+            feat_remainder, agg_func = [i for i in AGG_FUNC_REGEX_TERM.split(feat) if i]
+            _, source_table, feature_name = DEFAULT_SOURCE_TABLE_REGEX.split(feat_remainder)
+            return {
+                'source_table': source_table,
+                'time_agg': '',
+                'feature_name': feature_name,
+                'agg_func': agg_func
+            }
+        except:
+            return {
+                'source_table': '',
+                'time_agg': '',
+                'feature_name': '',
+                'agg_func': ''
+            }
+
+
+# --------------------------------------------------------------------------------------------------------------------
+# Random variable definitions
+# --------------------------------------------------------------------------------------------------------------------
+
+PREDICTION_RV_REGEX = re.compile('^(score|label)_metrics$')
+PREDICTION_AT_PRECISION_RV_REGEX = re.compile('^(prediction_at_precision_[0-9]+)_metrics$')
+FEATURE_REGEX = re.compile('^feature_(.*)_metrics$')
+
+
+def _parse_random_variable_name(rv_name):
+    """
+    Parse random variable name from config file section
+
+    :param rv_name: str, config file section name
+    :return: dict, random variable row definition
+    """
+    rv_row = {
+        'source_table': None,
+        'latent_variable_name': None,
+        'agg_func': None,
+        'time_agg': None
+    }
+
+    if PREDICTION_RV_REGEX.match(rv_name):
+        rv_row.update({
+            'rv_name': PREDICTION_RV_REGEX.match(rv_name).groups()[0],
+            'rv_type': 'prediction_raw',
+            'source_table': 'predictions'
+        })
+    elif PREDICTION_AT_PRECISION_RV_REGEX.match(rv_name):
+        rv_row.update({
+            'rv_name': PREDICTION_AT_PRECISION_RV_REGEX.match(rv_name).groups()[0],
+            'rv_type': 'prediction_at_precision',
+            'source_table': 'predictions'
+        })
+
+    elif FEATURE_REGEX.match(rv_name):
+        # try parse additional info
+        feature_full_name = FEATURE_REGEX.match(rv_name).groups()[0]
+        rv_row.update({
+            'rv_name': feature_full_name,
+            'rv_type': 'feature'
+        })
+
+        # try parse additional info
+        rv_row.update(_parse_default_triage_feature_name(feature_full_name))
+
+    else:
+        raise ValueError("Failed to match RV regex for RV name: '{}'".format(rv_name))
+
+    return rv_row
+
+
+# --------------------------------------------------------------------------------------------------------------------
 # Metric definitions
 # --------------------------------------------------------------------------------------------------------------------
 
@@ -178,10 +310,10 @@ def tabulate_metric_defs(mm_config):
             'metric_name': [],
             'compare_interval': [],
             'subset_name': [],
-            'subset_threshold': []
+            'subset_threshold': [np.NaN]
         }
 
-        global_metric_args = metric_config['global']
+        global_metric_args = metric_config['global_metrics']
 
         # if global settings to override
         if global_metric_args:
@@ -202,28 +334,29 @@ def tabulate_metric_defs(mm_config):
 
                 # check to make sure block arguments are complete
                 for k, v in block_metric_args.items():
-                    if not v:
-                        raise BadConfigurationError(
-                            "Missing metric def component: '{}', '{}', '{}'".format(metric_section, block_key, k)
-                        )
+                    if k != 'subset_threshold':
+                        if not v:
+                            raise BadConfigurationError(
+                                "Missing metric def component: '{}', '{}', '{}'".format(metric_section, block_key, k)
+                            )
 
                 # then add block arguments to metric_tables
                 metric_section_tables.append(_unpack_metric_args(block_metric_args))
 
             # concatenate metric section tables and append
-            metric_tables[ix] = pd.concat(metric_section_tables)  # type: pd.DataFrame
+            metric_tables.append(pd.concat(metric_section_tables))  # type: pd.DataFrame
 
         else:
             # only global settings specified- check to make sure config is properly specified
             for k, v in default_metric_args.items():
-                if not v:
-                    raise BadConfigurationError(
-                        "Missing metric def component: '{}', 'global', '{}'".format(metric_section, k)
-                    )
+                if k != 'subset_threshold':
+                    if not v:
+                        raise BadConfigurationError(
+                            "Missing metric def component: '{}', 'global', '{}'".format(metric_section, k)
+                        )
 
             # if so, then append
-            metric_tables[ix] = _unpack_metric_args(global_metric_args)
+            metric_tables.append(_unpack_metric_args(global_metric_args))
 
     # return mapping of random variables to metric tables
-    rv_names = [k[:-8] for k in metric_sections]
-    return dict(zip(rv_names, metric_tables))
+    return dict(zip(metric_sections, metric_tables))
