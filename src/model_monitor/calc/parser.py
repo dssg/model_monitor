@@ -249,17 +249,27 @@ def apply_distribution_calc(d1, d2, calc_type, distribution_metadata, calc_order
             return empirical_cdf_distance(d1.cdf_vals, d1.support, d2.cdf_vals, d2.support, calc_order)
 
     else:
-        # get cdf handles
-        f1 = d1.cdf
-        f2 = d2.cdf
-
-        merged_support = cdf_merge(d1.support, d1.cdf_vals, d2.support, d2.cdf_vals)[2]
-
+        # if CDF
         if calc_type == 'lp_cdf':
-            return integrated_lp_cdf_distance(f1, f2, merged_support[0], merged_support[-1], calc_order)
 
+            f1 = d1.cdf
+            f2 = d2.cdf
+
+            if d1.support and d2.support:
+                merged_support = cdf_merge(d1.support, d1.cdf_vals, d2.support, d2.cdf_vals)[2]
+                fmin = merged_support[0]
+                fmax = merged_support[-1]
+            else:
+                fmin = -np.Inf
+                fmax = np.Inf
+            return integrated_lp_cdf_distance(f1, f2, fmin, fmax, calc_order)
+
+        # else inverse CDF
         else:
-            raise NotImplementedError("Need to implement generalized inverse for CDF")
+            f1 = d1.cdf_inv
+            f2 = d2.cdf_inv
+
+            return integrated_lp_cdf_distance(f1, f2, 0., 1., calc_order)
 
 
 def apply_metric_calculation(today_df, compare_df, metric_defs, distribution_metadata):

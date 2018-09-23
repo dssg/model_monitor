@@ -106,4 +106,4 @@ def integrated_lp_cdf_distance(f1, f2, xmin, xmax, p=1):
             def ifunc(x):
                 return np.power(f1(x) - f2(x), p)
 
-        return integrate.quad(ifunc, xmin, xmax)
+        return integrate.quad(ifunc, xmin, xmax)[0]

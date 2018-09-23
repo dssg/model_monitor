@@ -147,51 +147,73 @@ class BaseDistribution(ABC):
         """
         pass
 
-    def _default_cdf_empirical_mapping(self):
+    @abstractproperty
+    def cdf_inv(self):
+        """
+        Abstract property for generating CDF
+
+        :return: function
+        """
+        pass
+
+    def _default_cdf_interpolation_mapping(self, inv=False):
         """
         If using default CDF interpolation, apply interpolation arguments
 
+        :param inv: bool, if True, reverses support and cdf values
         :return: function
         """
         if self.metadata.interpolation_mode == 'empirical':
-            return self._cdf_empirical_interpolation()
+            return self._cdf_empirical_interpolation(inv=inv)
         elif self.metadata.interpolation_mode == 'nearest':
-            return self._cdf_nearest_interpolation()
+            return self._cdf_nearest_interpolation(inv=inv)
         elif self.metadata.interpolation_mode == 'linear':
-            return self._cdf_linear_interpolation()
+            return self._cdf_linear_interpolation(inv=inv)
         else:
-            return self._cdf_pchip_interpolation()
+            return self._cdf_pchip_interpolation(inv=inv)
 
-    def _cdf_empirical_interpolation(self):
+    def _cdf_empirical_interpolation(self, inv=False):
         """
         Default CDF empirical interpolation function
 
+        :param inv: bool, if True, reverses support and cdf values
         :return: function
         """
+        if inv:
+            return interpolate.interp1d(self.cdf_vals, self.support, kind='previous')
         return interpolate.interp1d(self.support, self.cdf_vals, kind='next')
 
-    def _cdf_nearest_interpolation(self):
+    def _cdf_nearest_interpolation(self, inv=False):
         """
         Default CDF empirical nearest neighbor interpolation
 
+        :param inv: bool, if True, reverses support and cdf values
         :return: function
         """
+        if inv:
+            return interpolate.interp1d(self.cdf_vals, self.support, kind='nearest')
         return interpolate.interp1d(self.support, self.cdf_vals, kind='nearest')
 
-    def _cdf_linear_interpolation(self):
+    def _cdf_linear_interpolation(self, inv=False):
         """
         Default CDF linear interpolation function
 
+        :param inv: bool, if True, reverses support and cdf values
         :return: function
         """
+        if inv:
+            return interpolate.interp1d(self.cdf_vals, self.support, kind='linear')
         return interpolate.interp1d(self.support, self.cdf_vals, kind='linear')
 
-    def _cdf_pchip_interpolation(self):
+    def _cdf_pchip_interpolation(self, inv=False):
         """
         Default CDF cubic monotonic (piecewise cubic hermite interpolating polynomial) interpolation function
 
+        :param inv: bool, if True, reverses support and cdf values
         :return: function
         """
+        if inv:
+            return interpolate.PchipInterpolator(self.cdf_vals, self.support)
         return interpolate.PchipInterpolator(self.support, self.cdf_vals)
 
     def reset(self):
@@ -288,6 +310,15 @@ class DiscreteDistribution(BaseDistribution):
         """
         return self._cdf_empirical_interpolation()
 
+    @property
+    def cdf_inv(self):
+        """
+        Empirical CDF inverse property
+
+        :return: function
+        """
+        return self._cdf_empirical_interpolation(inv=True)
+
 
 class ContinuousDistribution(BaseDistribution):
     """
@@ -371,6 +402,7 @@ class ContinuousDistribution(BaseDistribution):
 
             self._parametric_args = None
             self._parametric_cdf = None
+            self._parametric_cdf_inv = None
 
         # ------------------------------------------------------------------------------------------------------------
         # cluster estimates
@@ -581,6 +613,8 @@ class ContinuousDistribution(BaseDistribution):
                 # apply corrected mapping to distribution to generate cdf
                 dist = getattr(stats, self.metadata.parametric_family)
                 self._parametric_cdf = partial(dist.cdf, **self._parametric_args)
+                self._parametric_cdf_inv = partial(dist.ppf, **self._parametric_args)
+
             else:
                 warnings.warn("Attempted multiple initialization of distribution",
                               OfflineReinitializationWarning)
@@ -659,7 +693,24 @@ class ContinuousDistribution(BaseDistribution):
 
         # else fall back on interpolant solution
         else:
-            return self._default_cdf_empirical_mapping()
+            return self._default_cdf_interpolation_mapping()
+
+    @property
+    def cdf_inv(self):
+        """
+        CDF inverse property
+
+        :return: function
+        """
+        # check for parametric estimates first
+        if self.metadata.tracking_mode == 'parametric':
+            return self._parametric_cdf_inv
+        elif self.metadata.tracking_mode == 'cluster' and self.metadata.clustering_parametric_family:
+            raise NotImplementedError("Inverse for parameterized clusters not implemented")
+
+        # else fall back on interpolant solution
+        else:
+            return self._default_cdf_interpolation_mapping(inv=True)
 
 
 def distribution_factory(distribution_metadata):
