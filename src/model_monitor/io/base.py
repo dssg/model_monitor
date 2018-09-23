@@ -62,21 +62,21 @@ class BaseResultsExtractor(ABC):
 class BaseFeatureExtractor(ABC):
 
     @abstractmethod
-    def load_matrix_by_hash(self, matrix_hash):
+    def load_matrix_by_uuid(self, matrix_uuid):
         """
         Method to load matrix by matrix hash
 
-        :param matrix_hash: str, matrix UUID
+        :param matrix_uuid: str, matrix UUID
         :return: pd.DataFrame
         """
         pass
 
     @abstractmethod
-    def load_features_by_hash(self, matrix_hash, feature):
+    def load_feature_by_uuid(self, matrix_uuid, feature):
         """
-        Method to load individual feature by matrix hash
+        Method to load individual feature by matrix UUID
 
-        :param matrix_hash: str, matrix UUID
+        :param matrix_uuid: str, matrix UUID
         :param feature: str, feature name
         :return: pd.Series
         """

@@ -270,34 +270,34 @@ class TriageS3FeatureExtractor(BaseFeatureExtractor):
         self.client.Object(Bucket=self._bucket, key=full_key).put(Body=open('/tmp/{}.h5'.format(matrix_hash), 'rb'))
         self._initialized_matrices.add(tmp_loc)
 
-    def load_matrix_by_hash(self, matrix_hash):
+    def load_matrix_by_uuid(self, matrix_uuid):
         """
         Load matrix by hash
 
-        :param matrix_hash: str, uuid
+        :param matrix_uuid: str, uuid
         :return: pd.DataFrame
         """
 
         # check if need to pull from s3 to tmp location
-        tmp_loc = '/tmp/{}.h5'.format(matrix_hash)
+        tmp_loc = '/tmp/{}.h5'.format(matrix_uuid)
         if tmp_loc not in self._initialized_matrices:
-            self._initialize(matrix_hash)
+            self._initialize(matrix_uuid)
 
         # read matrix
         with pd.HDFStore(tmp_loc, mode='r') as stor:
-            return stor['/{}'.format(matrix_hash)]
+            return stor['/{}'.format(matrix_uuid)]
 
-    def load_features_by_hash(self, matrix_hash, feature):
+    def load_feature_by_uuid(self, matrix_uuid, feature):
         """
         Load matrix feature by hash
 
-        :param matrix_hash: str, uuid
+        :param matrix_uuid: str, uuid
         :param feature: str, feature name
         :return: pd.Series
         """
 
         with pd.HDFStore('/tmp/{}.h5', mode='r') as stor:
-            return stor.select('/{}'.format(matrix_hash), columns=feature)
+            return stor.select('/{}'.format(matrix_uuid), columns=feature)
 
     def cleanup(self, matrix_hash=None):
         """

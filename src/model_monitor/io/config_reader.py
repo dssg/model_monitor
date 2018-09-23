@@ -232,20 +232,31 @@ def _parse_random_variable_name(rv_name):
         'source_table': None,
         'latent_variable_name': None,
         'agg_func': None,
-        'time_agg': None
+        'time_agg': None,
+        'is_test': None,
+
     }
 
     if PREDICTION_RV_REGEX.match(rv_name):
         rv_row.update({
             'rv_name': PREDICTION_RV_REGEX.match(rv_name).groups()[0],
             'rv_type': 'prediction_raw',
-            'source_table': 'predictions'
+            'source_table': 'predictions',
+            'is_test': True
         })
     elif PREDICTION_AT_PRECISION_RV_REGEX.match(rv_name):
         rv_row.update({
             'rv_name': PREDICTION_AT_PRECISION_RV_REGEX.match(rv_name).groups()[0],
             'rv_type': 'prediction_at_precision',
-            'source_table': 'predictions'
+            'source_table': 'predictions',
+            'is_test': True
+        })
+    elif rv_name == 'feature_importance_metrics':
+        rv_row.update({
+            'rv_name': 'feature_importance',
+            'rv_type': 'feature_importance',
+            'source_table': 'feature_importances',
+            'is_test': False
         })
 
     elif FEATURE_REGEX.match(rv_name):
@@ -253,7 +264,8 @@ def _parse_random_variable_name(rv_name):
         feature_full_name = FEATURE_REGEX.match(rv_name).groups()[0]
         rv_row.update({
             'rv_name': feature_full_name,
-            'rv_type': 'feature'
+            'rv_type': 'feature',
+            'is_test': False
         })
 
         # try parse additional info
@@ -264,6 +276,25 @@ def _parse_random_variable_name(rv_name):
 
     return rv_row
 
+
+def read_rv_defs(mm_config):
+    """
+    Read random variable definitions from mm_config
+
+    :param mm_config: dict
+    :return: dict<str: dict>
+    """
+
+    metric_sections = [k for k in mm_config.keys() if '_metrics' in k]
+    metric_section_rv_defs = [_parse_random_variable_name(n) for n in metric_sections]
+
+    # apply overrides if present
+    for ix, metric_section in enumerate(metric_sections):
+        section_config = mm_config[metric_section]
+        if 'rv_overrides' in section_config.keys():
+            metric_section_rv_defs[ix].update(section_config['rv_overrides'])
+
+    return dict(zip(metric_sections, metric_section_rv_defs))
 
 # --------------------------------------------------------------------------------------------------------------------
 # Metric definitions
@@ -628,8 +659,7 @@ class DistributionMetadata(object):
 
 def read_distribution_metadata(mm_config):
     """
-    Tabulate metric definition from mm_config.yaml
-    See the configuration documentation for notes on how to properly specify metric definitions
+    Parse distribution_metadata from mm_config
 
     :param mm_config: dict
     :return: dict<str: DistributionMetadata>
