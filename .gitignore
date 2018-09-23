@@ -1,6 +1,12 @@
 # model_monitor specific files
 mm_config.yaml
 
+
+# docs-specific files
+docs/sphinx/_build/
+docs/sphinx/_static/
+docs/sphinx/_templates/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
