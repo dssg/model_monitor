@@ -104,11 +104,11 @@ class DistributionMetadata(object):
         :param n_quantiles: int, number of quantiles
         :param n_lower_tail_quantiles: int, number of lower tail quantiles (in powers of ten)
         :param n_upper_tail_quantiles: int, number of upper tail quantiles (in powers of ten)
-        :param custom_quantiles: str, comma-delimited quantiles
+        :param custom_quantiles: list of quantiles
         :param histogram_min: numeric
         :param histogram_max: numeric
         :param n_histogram_bins: int, number of evenly spaced histogram bins
-        :param custom_histogram_bins: str, comma-delimited histogram bins
+        :param custom_histogram_bins: list of histogram bins
         :param n_clusters: int, number of clusters
         :param clustering_algorithm: str, clustering algorithm
         :param clustering_algorithm_kwargs: dict, clustering algorithm keyword arguments
@@ -251,6 +251,7 @@ class DistributionMetadata(object):
             self.remove_samples_out_of_support = bool(remove_samples_out_of_support)
             self.is_online = bool(is_online)
             self.warn_on_online_support_change = bool(warn_on_online_support_change)
+            self.interpolation_mode = interpolation_mode
             self.tracking_mode = str(tracking_mode) if tracking_mode else None
             self.n_quantiles = int(n_quantiles) if n_quantiles else 0
             self.n_lower_tail_quantiles = int(n_lower_tail_quantiles) if n_lower_tail_quantiles else 0

@@ -482,7 +482,3 @@ class TestContinuousDistributionCluster(unittest.TestCase):
 
         self.assertAlmostEqual(self.cd_mix_param.cdf(0),
                                0.3228527274992709)
-
-
-if __name__ == '__main__':
-    unittest.main()
