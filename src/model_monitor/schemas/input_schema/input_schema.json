@@ -101,7 +101,7 @@
             "name": "train_matrix_id",
             "dtype": "Integer",
             "description": "associated training matrix unique ID",
-            "nullable": "false",
+            "nullable": "true",
             "constraints": "FK"
         }
     ],
