@@ -7,24 +7,20 @@ class BaseResultsExtractor(ABC):
     """
 
     @abstractmethod
-    def select_predictions(self, target_date):
+    def select_training_matrices(self):
         """
-        Query predictions table
+        Query training matrices table
 
-        :param target_date: str, format YYYY-MM-DD
         :return: pd.DataFrame
         """
-        pass
 
     @abstractmethod
-    def select_feature_importances(self, target_date):
+    def select_testing_matrices(self):
         """
-        Query feature importances table
+        Query training matrices table
 
-        :param target_date: str, format YYYY-MM-DD
         :return: pd.DataFrame
         """
-        pass
 
     @abstractmethod
     def select_models(self):
@@ -39,6 +35,24 @@ class BaseResultsExtractor(ABC):
     def select_model_groups(self):
         """
         Query model groups table
+
+        :return: pd.DataFrame
+        """
+        pass
+
+    @abstractmethod
+    def select_predictions(self):
+        """
+        Query predictions table
+
+        :return: pd.DataFrame
+        """
+        pass
+
+    @abstractmethod
+    def select_feature_importances(self):
+        """
+        Query feature importances table
 
         :return: pd.DataFrame
         """

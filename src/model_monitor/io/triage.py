@@ -22,59 +22,67 @@ class TriageResultsExtractor(BaseResultsExtractor):
 
         # argument parsing - nulls need separate clauses for array-like SQL arguments
 
-        # default arguments (NB: lists are unused dummy parameters)
-        self.model_group_id_params = {
-            'included_model_group_ids': [0, ],
-            'filter_included_model_group_ids': False,
+        epoch_start = datetime.datetime.fromtimestamp(0).strftime("%Y-%m-%d")
+        today = datetime.datetime.today().strftime("%Y-%m-%d")
+
+        self.default_args = {
+            'included_model_group_ids': [0,],
             'excluded_model_group_ids': [0, ],
-            'filter_excluded_model_group_ids': False,
-        }
-        self.model_type_params = {
             'included_model_types': ["", ],
-            'filter_included_model_types': False,
             'excluded_model_types': ["", ],
-            'filter_excluded_model_types': False,
-        }
-
-        self.model_id_params = {
             'included_model_ids': [0, ],
-            'filter_included_model_ids': False,
             'excluded_model_ids': [0, ],
-            'filter_excluded_model_ids': False,
+            'train_as_of_date_start': epoch_start,
+            'train_as_of_date_end': today,
+            'test_as_of_date_start': epoch_start,
+            'test_as_of_date_end': today,
+            'filter_included_model_group_ids': False,
+            'filter_excluded_model_group_ids': False,
+            'filter_included_model_types': False,
+            'filter_excluded_model_types': False,
+            'filter_included_model_ids': False,
+            'filter_excluded_model_ids': False
         }
 
-        # update to include / exclude model groups
-        included_model_group_ids = mm_config['model_targets']['included_model_group_ids']
-        if included_model_group_ids:
-            self.model_group_id_params['included_model_group_ids'] = included_model_group_ids
-            self.model_group_id_params['filter_included_model_group_ids'] = True
+        model_targets = mm_config['model_targets']
 
-        excluded_model_group_ids = mm_config['model_targets']['excluded_model_group_ids']
-        if excluded_model_group_ids:
-            self.model_group_id_params['excluded_model_group_ids'] = excluded_model_group_ids
-            self.model_group_id_params['filter_excluded_model_group_ids'] = True
+        # model subset parsing
+        if model_targets['included_model_group_ids']:
+            self.default_args['incldued_model_group_ids'] = model_targets['included_model_group_ids']
+            self.default_args['filter_included_model_group_ids'] = True
 
-        # include / exclude model types
-        included_model_types = mm_config['model_targets']['included_model_types']
-        if included_model_types:
-            self.model_type_params['included_model_types'] = included_model_types
-            self.model_type_params['filter_included_model_types'] = True
+        if model_targets['excluded_model_group_ids']:
+            self.default_args['excldued_model_group_ids'] = model_targets['excluded_model_group_ids']
+            self.default_args['filter_excluded_model_group_ids'] = True
 
-        excluded_model_types = mm_config['model_targets']['excluded_model_types']
-        if included_model_types:
-            self.model_type_params['excluded_model_types'] = excluded_model_types
-            self.model_type_params['filter_included_model_types'] = True
+        if model_targets['included_model_types']:
+            self.default_args['incldued_model_types'] = model_targets['included_model_types']
+            self.default_args['filter_included_model_types'] = True
 
-        # include / exclude models
-        included_model_ids = mm_config['model_targets']['included_model_ids']
-        if included_model_ids:
-            self.model_id_params['included_model_ids'] = included_model_ids
-            self.model_id_params['filter_included_model_ids'] = True
+        if model_targets['excluded_model_types']:
+            self.default_args['excldued_model_types'] = model_targets['excluded_model_types']
+            self.default_args['filter_excluded_model_types'] = True
 
-        excluded_model_ids = mm_config['model_targets']['excluded_model_ids']
-        if excluded_model_ids:
-            self.model_id_params['excluded_model_ids'] = excluded_model_ids
-            self.model_id_params['filter_excluded_model_ids'] = True
+        if model_targets['included_model_ids']:
+            self.default_args['incldued_model_ids'] = model_targets['included_model_ids']
+            self.default_args['filter_included_model_ids'] = True
+
+        if model_targets['excluded_model_ids']:
+            self.default_args['excldued_model_ids'] = model_targets['excluded_model_ids']
+            self.default_args['filter_excluded_model_ids'] = True
+
+        # model date parsing
+        if model_targets['train_as_of_date_start']:
+            self.default_args['train_as_of_date_start'] = model_targets['train_as_of_date_start']
+
+        if model_targets['train_as_of_date_start']:
+            self.default_args['train_as_of_date_start'] = model_targets['train_as_of_date_start']
+
+        if model_targets['test_as_of_date_end']:
+            self.default_args['train_as_of_date_end'] = model_targets['train_as_of_date_end']
+
+        if model_targets['test_as_of_date_end']:
+            self.default_args['train_as_of_date_end'] = model_targets['train_as_of_date_end']
 
     def _read_triage_query(self, fname):
         """
@@ -98,10 +106,7 @@ class TriageResultsExtractor(BaseResultsExtractor):
         :return: pd.DataFrame
         """
         query = self._read_triage_query('model_groups.sql')
-
-        params = self.model_group_id_params.copy()
-        params.update(self.model_type_params)
-
+        params = self.default_args.copy()
         return pd.read_sql(query, params=params, con=self._engine)
 
     def select_models(self):
@@ -111,44 +116,58 @@ class TriageResultsExtractor(BaseResultsExtractor):
         :return: pd.DataFrame
         """
         query = self._read_triage_query('models.sql')
-
-        params = self.model_group_id_params.copy()
-        params.update(self.model_type_params)
-        params.update(self.model_id_params)
-
+        params = self.default_args.copy()
         return pd.read_sql(query, params=params, con=self._engine)
 
-    def select_predictions(self, target_date):
+    def select_predictions(self):
         """
         Select predictions according to configuration filters
 
-        :param target_date: str, format "YYYY-MM-DD"
         :return: pd.DataFrame
         """
         query = self._read_triage_query('predictions.sql')
+        params = self.default_args.copy()
+        return pd.read_sql(query, params=params, con=self._engine)
 
-        params = {'target_date': datetime.datetime.strptime(target_date, "%Y-%m-%d")}
-        params.update(self.model_group_id_params)
-        params.update(self.model_type_params)
-        params.update(self.model_id_params)
-
-        return pd.read_sql(query, con=self._engine, params=params)
-
-    def select_feature_importances(self, target_date):
+    def select_feature_importances(self):
         """
         Select feature importances according to configuration filters
 
-        :param target_date: str, format "YYYY-MM-DD"
         :return: pd.DataFrame
         """
         query = self._read_triage_query('feature_importances.sql')
+        params = self.default_args.copy()
 
-        params = {'target_date': datetime.datetime.strptime(target_date, "%Y-%m-%d")}
-        params.update(self.model_group_id_params)
-        params.update(self.model_type_params)
-        params.update(self.model_id_params)
+        # drop unused params
+        del params['test_as_of_date_start']
+        del params['test_as_of_date_end']
 
-        return pd.read_sql(query, con=self._engine, params=params)
+        return pd.read_sql(query, params=params, con=self._engine)
+
+    def select_training_matrices(self):
+        """
+        Select training matrices according to configuration filters
+
+        :return: pd.DataFrame
+        """
+        query = self._read_triage_query('training_matrices.sql')
+        params = self.default_args.copy()
+
+        # drop unused params
+        del params['test_as_of_date_start']
+        del params['test_as_of_date_end']
+
+        return pd.read_sql(query, params=params, con=self._engine)
+
+    def select_testing_matrices(self):
+        """
+        Select training matrices according to configuration filters
+
+        :return: pd.DataFrame
+        """
+        query = self._read_triage_query('testing_matrices.sql')
+        params = self.default_args.copy()
+        return pd.read_sql(query, params=params, con=self._engine)
 
 
 # --------------------------------------------------------------------------------------------------------------------
